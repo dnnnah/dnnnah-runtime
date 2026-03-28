@@ -1,13 +1,21 @@
 'use client'
 
+// 1. React
 import { useRef, useState, useEffect } from 'react'
+
+// 2. Shared hooks
 import { useLenis } from '@/shared/hooks/useLenis'
-import { useHeroReveal } from './useHeroReveal'
-import type { BootSectionProps, PanicState } from './types'
-import { NavBar } from './NavBar'
 import { useKonami } from '@/shared/hooks/useKonami'
-import { KonamiModal } from './KonamiModal'
 import { useGoroutineLeak } from '@/shared/hooks/useGoroutineLeak'
+
+// 3. Shared types
+import type { BootSectionProps, PanicState } from './types'
+
+// 4. Feature components y hooks locales
+import { NavBar } from './NavBar'
+import { KonamiModal } from './KonamiModal'
+import { PanicTrace } from './PanicTrace'
+import { useHeroReveal } from './useHeroReveal'
 
 /**
  * Sección hero del portfolio — /boot
@@ -24,36 +32,33 @@ export function BootSection({ className = '' }: BootSectionProps) {
   const konamiActivated = useKonami()
   const [showKonami, setShowKonami] = useState(false)
 
+  // Estado del easter egg panic trace
+  const [showPanic, setShowPanic] = useState(false)
+
   useEffect(() => {
     if (konamiActivated) setShowKonami(true)
   }, [konamiActivated])
 
   const panicRef = useRef<PanicState>({
-    active:        false,
-    scrollDelta:   0,
+    active: false,
+    scrollDelta: 0,
     lastTimestamp: 0,
   })
 
   function handleWheel(e: React.WheelEvent<HTMLElement>) {
-    const now   = Date.now()
+    const now = Date.now()
     const state = panicRef.current
 
     if (now - state.lastTimestamp > 400) {
       state.scrollDelta = 0
     }
 
-    state.scrollDelta    += Math.abs(e.deltaY)
-    state.lastTimestamp   = now
+    state.scrollDelta += Math.abs(e.deltaY)
+    state.lastTimestamp = now
 
     if (state.scrollDelta > 3000 && !state.active) {
       state.active = true
-      document.body.classList.add('panic')
-
-      setTimeout(() => {
-        document.body.classList.remove('panic')
-        state.active      = false
-        state.scrollDelta = 0
-      }, 2500)
+      setShowPanic(true)
     }
   }
 
@@ -82,15 +87,15 @@ export function BootSection({ className = '' }: BootSectionProps) {
         <p
           className="font-mono"
           style={{
-            fontSize:      'clamp(9px, 2vw, 11px)',
+            fontSize: 'clamp(9px, 2vw, 11px)',
             letterSpacing: '0.08em',
-            color:         'var(--color-text-muted)',
-            textAlign:     'center',
+            color: 'var(--color-text-muted)',
+            textAlign: 'center',
           }}
         >
           <span
             style={{
-              color:     'var(--color-status-live)',
+              color: 'var(--color-status-live)',
               animation: 'pulse 2s ease-in-out infinite',
             }}
           >
@@ -104,24 +109,24 @@ export function BootSection({ className = '' }: BootSectionProps) {
           ref={titleRef}
           className="select-none text-center"
           style={{
-            fontFamily:    'var(--font-monument), var(--font-jetbrains), monospace',
-            fontSize:      'clamp(48px, 15vw, 120px)',
-            fontWeight:    900,
-            lineHeight:    1.05,
+            fontFamily: 'var(--font-monument), var(--font-jetbrains), monospace',
+            fontSize: 'clamp(48px, 15vw, 120px)',
+            fontWeight: 900,
+            lineHeight: 1.05,
             letterSpacing: '-0.03em',
-            color:         'var(--color-text)',
-            display:       'flex',
-            alignItems:    'baseline',
-            justifyContent:'center',
+            color: 'var(--color-text)',
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'center',
           }}
         >
           <span>DNNNAH</span>
           <span
             aria-hidden="true"
             style={{
-              color:       'var(--color-accent)',
-              animation:   'blink 1s linear infinite',
-              marginLeft:  '4px',
+              color: 'var(--color-accent)',
+              animation: 'blink 1s linear infinite',
+              marginLeft: '4px',
             }}
           >
             _
@@ -132,9 +137,9 @@ export function BootSection({ className = '' }: BootSectionProps) {
         <p
           className="font-mono text-center"
           style={{
-            fontSize:      'clamp(11px, 2.5vw, 13px)',
-            color:         'var(--color-text-muted)',
-            marginTop:     '4px',
+            fontSize: 'clamp(11px, 2.5vw, 13px)',
+            color: 'var(--color-text-muted)',
+            marginTop: '4px',
           }}
         >
           Software Engineer · Automation Enthusiast · Go Runtime
@@ -155,18 +160,18 @@ export function BootSection({ className = '' }: BootSectionProps) {
           <button
             className="font-mono"
             style={{
-              minHeight:     '44px',
-              minWidth:      '160px',
-              background:    'transparent',
-              color:         'var(--color-accent-cyan)',
-              border:        '1px solid rgba(139,233,253,0.35)',
-              padding:       '8px 20px',
-              fontSize:      'clamp(10px, 2.5vw, 12px)',
-              fontWeight:    700,
+              minHeight: '44px',
+              minWidth: '160px',
+              background: 'transparent',
+              color: 'var(--color-accent-cyan)',
+              border: '1px solid rgba(139,233,253,0.35)',
+              padding: '8px 20px',
+              fontSize: 'clamp(10px, 2.5vw, 12px)',
+              fontWeight: 700,
               letterSpacing: '0.1em',
-              borderRadius:  '4px',
-              cursor:        'pointer',
-              transition:    'background-color 0.2s ease',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              transition: 'background-color 0.2s ease',
             }}
             onMouseEnter={e =>
               (e.currentTarget.style.backgroundColor = 'rgba(139,233,253,0.08)')
@@ -183,36 +188,36 @@ export function BootSection({ className = '' }: BootSectionProps) {
       {/* Scroll hint — anclado al fondo */}
       <div
         style={{
-          position:   'absolute',
-          bottom:     '48px',
-          left:       '50%',
-          transform:  'translateX(-50%)',
-          display:    'flex',
-          flexDirection:'column',
+          position: 'absolute',
+          bottom: '48px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          gap:        '8px',
+          gap: '8px',
         }}
         aria-hidden="true"
       >
         <span
           className="font-mono"
           style={{
-            fontSize:      'clamp(9px, 2vw, 11px)',
+            fontSize: 'clamp(9px, 2vw, 11px)',
             letterSpacing: '0.08em',
-            color:         'var(--color-text-disabled)',
-            whiteSpace:    'nowrap',
+            color: 'var(--color-text-disabled)',
+            whiteSpace: 'nowrap',
           }}
         >
           // SCROLL_TO_INITIALIZE_RUNTIME
         </span>
         <div
           style={{
-            width:       '8px',
-            height:      '8px',
+            width: '8px',
+            height: '8px',
             borderRight: '1.5px solid var(--color-text-disabled)',
-            borderBottom:'1.5px solid var(--color-text-disabled)',
-            transform:   'rotate(45deg)',
-            animation:   'bounce 1.5s ease-in-out infinite',
+            borderBottom: '1.5px solid var(--color-text-disabled)',
+            transform: 'rotate(45deg)',
+            animation: 'bounce 1.5s ease-in-out infinite',
           }}
         />
       </div>
@@ -220,6 +225,15 @@ export function BootSection({ className = '' }: BootSectionProps) {
       {/* Easter egg — Konami modal */}
       {showKonami && (
         <KonamiModal onClose={() => setShowKonami(false)} />
+      )}
+
+      {/* Easter egg — Panic Trace */}
+      {showPanic && (
+        <PanicTrace onComplete={() => {
+          setShowPanic(false)
+          panicRef.current.active = false
+          panicRef.current.scrollDelta = 0
+        }} />
       )}
     </section>
   )

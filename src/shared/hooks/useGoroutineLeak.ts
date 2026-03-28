@@ -9,8 +9,8 @@ import { useEffect, useRef } from 'react'
  * Cualquier interacción del usuario los elimina.
  */
 
-const INACTIVITY_TIMEOUT = 1 * 60 * 1000 // 10 minutos en ms
-const GHOST_COUNT = 4                       // número de cursors fantasma
+const INACTIVITY_TIMEOUT = 30 * 1000 // 10 minutos en ms (1 x 60 x 1000 es un minuto)
+const GHOST_COUNT = 4                // número de cursors fantasma
 
 interface GhostCursor {
   id:  number
