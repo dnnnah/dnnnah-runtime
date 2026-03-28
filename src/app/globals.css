@@ -1,26 +1,185 @@
-@import "tailwindcss";
+/* ─── GOOGLE FONTS ──────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap');
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─── TAILWIND DIRECTIVES ───────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── CSS CUSTOM PROPERTIES ────────────────────────────── */
+/* Dark mode — Dracula (default) */
+:root, .dark {
+  --color-bg-base:       #282a36;
+  --color-bg-surface:    #1e1f29;
+  --color-bg-elevated:   #343746;
+
+  --color-accent:        #bd93f9;
+  --color-accent-2:      #ff79c6;
+  --color-accent-cyan:   #8be9fd;
+
+  --color-text:          #f8f8f2;
+  --color-text-muted:    #6272a4;
+  --color-text-disabled: #44475a;
+
+  --color-border:        rgba(189, 147, 249, 0.15);
+  --color-border-hover:  rgba(189, 147, 249, 0.35);
+  --color-focus:         #bd93f9;
+
+  --color-status-live:   #50fa7b;
+  --color-status-build:  #f1fa8c;
+  --color-status-off:    #ff5555;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Light mode — Go/Gopher */
+.light {
+  --color-bg-base:       #e8f4fc;
+  --color-bg-surface:    #ffffff;
+  --color-bg-elevated:   #dbedf7;
+
+  --color-accent:        #00acd7;
+  --color-accent-2:      #ce3262;
+  --color-accent-cyan:   #00add8;
+
+  --color-text:          #003a5c;
+  --color-text-muted:    #0077be;
+  --color-text-disabled: #8ab8d4;
+
+  --color-border:        rgba(0, 172, 215, 0.18);
+  --color-border-hover:  rgba(0, 172, 215, 0.40);
+  --color-focus:         #00acd7;
+
+  --color-status-live:   #1a8a3a;
+  --color-status-build:  #b8860b;
+  --color-status-off:    #c0392b;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── BASE STYLES ───────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg-base);
+  color: var(--color-text);
+  font-family: var(--font-jetbrains), 'Fira Code', 'Courier New', monospace;
+  font-size: clamp(11px, 2.5vw, 13px);
+  line-height: 1.6;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── PANIC EASTER EGG ──────────────────────────────────── */
+@keyframes panicFlash {
+  0%, 100% { background-color: transparent; }
+  10%, 30%, 50% { background-color: rgba(255, 85, 85, 0.15); }
+  20%, 40% { background-color: transparent; }
+}
+
+body.panic {
+  animation: panicFlash 2.5s ease-in-out forwards;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--color-bg-base); }
+::-webkit-scrollbar-thumb { background: var(--color-border-hover); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
+
+/* ─── SELECCIÓN DE TEXTO ────────────────────────────────── */
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg-base);
+}
+
+/* ─── FOCUS VISIBLE ─────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ─── REDUCED MOTION ────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── UTILIDADES CUSTOM ─────────────────────────────────── */
+@layer utilities {
+  /* Cursor parpadeante — terminal */
+  .cursor-blink::after {
+    content: '_';
+    animation: blink 1s linear infinite;
+    color: var(--color-accent);
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Scanline overlay — efecto CRT sutil */
+  .scanline-overlay::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* Status dots */
+  .status-dot::before { content: '● '; font-size: 0.7em; }
+  .status-live::before   { color: var(--color-status-live); }
+  .status-build::before  { color: var(--color-status-build); }
+  .status-offline::before { color: var(--color-status-off); }
+
+  /* Botón base */
+  .btn-primary {
+    background-color: transparent;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    padding: 8px 20px;
+    font-family: inherit;
+    font-size: clamp(10px, 2.5vw, 12px);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .btn-primary:hover,
+  .btn-primary:focus-visible {
+    background-color: var(--color-accent);
+    color: var(--color-bg-base);
+  }
+
+  .btn-filled {
+    background-color: var(--color-accent);
+    color: var(--color-bg-base);
+    border: 1px solid var(--color-accent);
+    font-weight: 700;
+  }
+
+  .btn-filled:hover {
+    opacity: 0.85;
+  }
 }
