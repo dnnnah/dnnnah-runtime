@@ -7,6 +7,7 @@ import type { BootSectionProps, PanicState } from './types'
 import { NavBar } from './NavBar'
 import { useKonami } from '@/shared/hooks/useKonami'
 import { KonamiModal } from './KonamiModal'
+import { useGoroutineLeak } from '@/shared/hooks/useGoroutineLeak'
 
 /**
  * Sección hero del portfolio — /boot
@@ -15,6 +16,8 @@ import { KonamiModal } from './KonamiModal'
  */
 export function BootSection({ className = '' }: BootSectionProps) {
   useLenis()
+  // Easter egg — cursors fantasma tras inactividad
+  useGoroutineLeak()
   const titleRef = useHeroReveal()
 
   // Easter egg — Konami Code
