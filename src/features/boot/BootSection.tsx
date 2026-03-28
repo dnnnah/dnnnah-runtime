@@ -1,10 +1,12 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useLenis } from '@/shared/hooks/useLenis'
 import { useHeroReveal } from './useHeroReveal'
 import type { BootSectionProps, PanicState } from './types'
 import { NavBar } from './NavBar'
+import { useKonami } from '@/shared/hooks/useKonami'
+import { KonamiModal } from './KonamiModal'
 
 /**
  * Sección hero del portfolio — /boot
@@ -14,6 +16,14 @@ import { NavBar } from './NavBar'
 export function BootSection({ className = '' }: BootSectionProps) {
   useLenis()
   const titleRef = useHeroReveal()
+
+  // Easter egg — Konami Code
+  const konamiActivated = useKonami()
+  const [showKonami, setShowKonami] = useState(false)
+
+  useEffect(() => {
+    if (konamiActivated) setShowKonami(true)
+  }, [konamiActivated])
 
   const panicRef = useRef<PanicState>({
     active:        false,
@@ -203,6 +213,11 @@ export function BootSection({ className = '' }: BootSectionProps) {
           }}
         />
       </div>
+
+      {/* Easter egg — Konami modal */}
+      {showKonami && (
+        <KonamiModal onClose={() => setShowKonami(false)} />
+      )}
     </section>
   )
 }
