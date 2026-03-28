@@ -7,7 +7,6 @@
 @tailwind utilities;
 
 /* ─── CSS CUSTOM PROPERTIES ────────────────────────────── */
-/* Dark mode — Dracula (default) */
 :root, .dark {
   --color-bg-base:       #282a36;
   --color-bg-surface:    #1e1f29;
@@ -30,7 +29,6 @@
   --color-status-off:    #ff5555;
 }
 
-/* Light mode — Go/Gopher */
 .light {
   --color-bg-base:       #e8f4fc;
   --color-bg-surface:    #ffffff;
@@ -73,19 +71,53 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── PANIC EASTER EGG ──────────────────────────────────── */
-@keyframes panicFlash {
-  0%, 100% { background-color: transparent; }
-  10%, 30%, 50% { background-color: rgba(255, 85, 85, 0.15); }
-  20%, 40% { background-color: transparent; }
+/* ─── KEYFRAMES ─────────────────────────────────────────── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
 }
 
+@keyframes bounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50%       { transform: rotate(45deg) translateY(4px); }
+}
+
+@keyframes panicFlash {
+  0%, 100%        { background-color: transparent; }
+  10%, 30%, 50%   { background-color: rgba(255, 85, 85, 0.15); }
+  20%, 40%        { background-color: transparent; }
+}
+
+@keyframes heroReveal {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0px);
+  }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* ─── PANIC EASTER EGG ──────────────────────────────────── */
 body.panic {
   animation: panicFlash 2.5s ease-in-out forwards;
 }
 
 /* ─── SCROLLBAR ─────────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar       { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--color-bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--color-border-hover); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
@@ -113,21 +145,27 @@ body.panic {
   }
 }
 
+/* ─── MOBILE SCROLL SNAP ────────────────────────────────── */
+@media (max-width: 767px) {
+  .snap-container {
+    scroll-snap-type: y mandatory;
+    overflow-y: scroll;
+    height: 100svh;
+  }
+  .snap-section {
+    scroll-snap-align: start;
+    height: 100svh;
+  }
+}
+
 /* ─── UTILIDADES CUSTOM ─────────────────────────────────── */
 @layer utilities {
-  /* Cursor parpadeante — terminal */
   .cursor-blink::after {
     content: '_';
     animation: blink 1s linear infinite;
     color: var(--color-accent);
   }
 
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  /* Scanline overlay — efecto CRT sutil */
   .scanline-overlay::after {
     content: '';
     position: fixed;
@@ -143,13 +181,11 @@ body.panic {
     z-index: 9999;
   }
 
-  /* Status dots */
-  .status-dot::before { content: '● '; font-size: 0.7em; }
+  .status-dot::before    { content: '● '; font-size: 0.7em; }
   .status-live::before   { color: var(--color-status-live); }
   .status-build::before  { color: var(--color-status-build); }
-  .status-offline::before { color: var(--color-status-off); }
+  .status-offline::before{ color: var(--color-status-off); }
 
-  /* Botón base */
   .btn-primary {
     background-color: transparent;
     color: var(--color-accent);
