@@ -12,7 +12,7 @@ import { useGoroutineLeak } from '@/shared/hooks/useGoroutineLeak'
 import type { BootSectionProps, PanicState } from './types'
 
 // 4. Feature components y hooks locales
-import { NavBar } from './NavBar'
+import { NavBar } from '@/shared/components/NavBar'
 import { KonamiModal } from './KonamiModal'
 import { PanicTrace } from './PanicTrace'
 import { useHeroReveal } from './useHeroReveal'
