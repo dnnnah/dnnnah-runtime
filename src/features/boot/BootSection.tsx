@@ -5,16 +5,12 @@ import { useRef, useState, useEffect } from 'react'
 
 // 2. Shared hooks
 import { useLenis } from '@/shared/hooks/useLenis'
-import { useKonami } from '@/shared/hooks/useKonami'
-import { useGoroutineLeak } from '@/shared/hooks/useGoroutineLeak'
 
 // 3. Shared types
 import type { BootSectionProps, PanicState } from './types'
 
 // 4. Feature components y hooks locales
 import { NavBar } from '@/shared/components/NavBar'
-import { KonamiModal } from './KonamiModal'
-import { PanicTrace } from './PanicTrace'
 import { useHeroReveal } from './useHeroReveal'
 
 /**
@@ -24,20 +20,8 @@ import { useHeroReveal } from './useHeroReveal'
  */
 export function BootSection({ className = '' }: BootSectionProps) {
   useLenis()
-  // Easter egg — cursors fantasma tras inactividad
-  useGoroutineLeak()
+
   const titleRef = useHeroReveal()
-
-  // Easter egg — Konami Code
-  const konamiActivated = useKonami()
-  const [showKonami, setShowKonami] = useState(false)
-
-  // Estado del easter egg panic trace
-  const [showPanic, setShowPanic] = useState(false)
-
-  useEffect(() => {
-    if (konamiActivated) setShowKonami(true)
-  }, [konamiActivated])
 
   const panicRef = useRef<PanicState>({
     active: false,
@@ -55,11 +39,6 @@ export function BootSection({ className = '' }: BootSectionProps) {
 
     state.scrollDelta += Math.abs(e.deltaY)
     state.lastTimestamp = now
-
-    if (state.scrollDelta > 3000 && !state.active) {
-      state.active = true
-      setShowPanic(true)
-    }
   }
 
   return (
@@ -221,20 +200,6 @@ export function BootSection({ className = '' }: BootSectionProps) {
           }}
         />
       </div>
-
-      {/* Easter egg — Konami modal */}
-      {showKonami && (
-        <KonamiModal onClose={() => setShowKonami(false)} />
-      )}
-
-      {/* Easter egg — Panic Trace */}
-      {showPanic && (
-        <PanicTrace onComplete={() => {
-          setShowPanic(false)
-          panicRef.current.active = false
-          panicRef.current.scrollDelta = 0
-        }} />
-      )}
     </section>
   )
 }
