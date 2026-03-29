@@ -280,6 +280,197 @@ body.panic {
   [id] {
     scroll-margin-top: 120px;
   }
+
+  /* ─── PROJECT CARDS ─────────────────────────────────────── */
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 31, 41, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  article:hover .card-overlay {
+    opacity: 1;
+  }
+  article:hover {
+    border-color: var(--color-accent) !important;
+  }
+
+  /* ─── STATUS BADGES ─────────────────────────────────────── */
+  .badge-base {
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-weight: 700;
+    display: inline-block;
+  }
+  .badge-live {
+    background: rgba(80, 250, 123, 0.12);
+    color: var(--color-status-live);
+    border: 1px solid rgba(80, 250, 123, 0.25);
+  }
+  .badge-build {
+    background: rgba(241, 250, 140, 0.12);
+    color: var(--color-status-build);
+    border: 1px solid rgba(241, 250, 140, 0.25);
+  }
+  .badge-off {
+    background: rgba(255, 85, 85, 0.1);
+    color: var(--color-status-off);
+    border: 1px solid rgba(255, 85, 85, 0.2);
+  }
+
+  /* ─── PROJECT DETAIL PANEL ──────────────────────────────── */
+  .detail-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    background: var(--color-bg-base);
+    overflow-y: auto;
+  }
+  .detail-panel.open {
+    transform: translateX(0);
+  }
+
+  .detail-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9997;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .detail-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @media (max-width: 767px) {
+    .detail-panel {
+      transform: translateY(100%);
+    }
+    .detail-panel.open {
+      transform: translateY(0);
+    }
+  }
+
+  /* ─── AGREGAR A globals.css (dentro de @layer utilities) ── */
+
+  /* Card hover overlay */
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(30, 31, 41, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  article:hover .card-overlay {
+    opacity: 1;
+  }
+
+  /* README markdown styles dentro del detail */
+  .readme-content h1 {
+    font-size: clamp(14px, 2.5vw, 18px);
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .readme-content h2 {
+    font-size: clamp(11px, 2vw, 13px);
+    font-weight: 700;
+    color: var(--color-accent);
+    margin-top: 24px;
+    margin-bottom: 8px;
+  }
+  .readme-content p {
+    color: var(--color-text-muted);
+    margin-bottom: 12px;
+  }
+  .readme-content code {
+    font-family: inherit;
+    font-size: 0.9em;
+    color: var(--color-accent-cyan);
+    background: var(--color-bg-elevated);
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--color-border);
+  }
+  .readme-content pre {
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+  .readme-content pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: var(--color-accent-cyan);
+    font-size: clamp(9px, 1.6vw, 11px);
+    line-height: 1.8;
+  }
+  .readme-content ul,
+  .readme-content ol {
+    padding-left: 20px;
+    margin-bottom: 12px;
+    color: var(--color-text-muted);
+  }
+  .readme-content li {
+    margin-bottom: 4px;
+  }
+  .readme-content strong {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  /* Detail panel — mobile override */
+  @media (max-width: 767px) {
+    .detail-body {
+      grid-template-columns: 1fr !important;
+    }
+    .detail-body > div:first-child {
+      border-right: none !important;
+      border-bottom: 1px solid var(--color-border);
+    }
+  }
+  /* ─── AGREGAR A globals.css dentro de @layer utilities ─── */
+
+  /* GitHub button hover */
+  .github-btn:hover {
+    color: var(--color-text) !important;
+    border-color: var(--color-accent) !important;
+    background-color: rgba(189, 147, 249, 0.06);
+  }
+
+  .github-btn:hover .github-arrow {
+    transform: translate(2px, -2px);
+  }
+
+  /* Back button hover */
+  a[href="/#bin-projects"].font-mono:hover {
+    color: var(--color-accent) !important;
+    border-color: var(--color-accent) !important;
+  }
+
+  /* Mobile — detail-body 1 columna */
+  @media (max-width: 767px) {
+    .detail-body {
+      grid-template-columns: 1fr !important;
+    }
+  }
 }
 
 /* ─── SYNTAX HIGHLIGHTING ──────────────────────────────── */

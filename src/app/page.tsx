@@ -5,6 +5,7 @@
  */
 import { BootSection } from '@/features/boot'
 import { ProfileSection } from '@/features/profile'
+import { ProjectsSection } from '@/features/projects'
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       {/* <ProfileSection /> */}
       <ProfileSection />
       {/* <ProjectsSection /> */}
+      <ProjectsSection />
       {/* <TerminalSection /> */}
       {/* <ContactSection /> */}
     </main>

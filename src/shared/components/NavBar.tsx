@@ -1,18 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname }         from 'next/navigation'
+import { useRouter }           from 'next/navigation'
 
 const navLinks = [
-  { label: '/boot',          href: '#boot' },
-  { label: 'kernel/profile', href: '#profile' },
-  { label: 'bin/projects',   href: '#projects' },
-  { label: 'sys/terminal',   href: '#terminal' },
-  { label: 'std/output',     href: '#contact' },
+  { label: '/boot',          anchor: 'boot' },
+  { label: 'kernel/profile', anchor: 'profile' },
+  { label: 'bin/projects',   anchor: 'bin-projects' },
+  { label: 'sys/terminal',   anchor: 'terminal' },
+  { label: 'std/output',     anchor: 'contact' },
 ]
 
 export function NavBar() {
-  const [scrolled,  setScrolled]  = useState(false)
-  const [menuOpen,  setMenuOpen]  = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const router   = useRouter()
+  const isRoot   = pathname === '/'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
@@ -20,13 +25,40 @@ export function NavBar() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Bloquea scroll del body cuando el menu mobile está abierto
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
-  const closeMenu = () => setMenuOpen(false)
+  // Cuando volvemos a / desde una subpágina, hace scroll al elemento guardado
+  useEffect(() => {
+    if (!isRoot) return
+    const target = sessionStorage.getItem('scrollTo')
+    if (!target) return
+    sessionStorage.removeItem('scrollTo')
+
+    // Espera 300ms para que GSAP y animaciones terminen de montar
+    const t = setTimeout(() => {
+      const el = document.getElementById(target)
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 300)
+
+    return () => clearTimeout(t)
+  }, [isRoot])
+
+  function handleNavClick(e: React.MouseEvent<HTMLAnchorElement>, anchor: string) {
+    e.preventDefault()
+
+    if (isRoot) {
+      const el = document.getElementById(anchor)
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } else {
+      sessionStorage.setItem('scrollTo', anchor)
+      router.push('/')
+    }
+
+    setMenuOpen(false)
+  }
 
   return (
     <>
@@ -51,9 +83,8 @@ export function NavBar() {
           transition: 'background-color 0.3s ease, border-color 0.3s ease',
         }}
       >
-        {/* Logo */}
         <a
-          href="#boot"
+          href="/"
           className="font-mono"
           style={{
             fontWeight:     700,
@@ -67,28 +98,24 @@ export function NavBar() {
           <span style={{ animation: 'blink 1s linear infinite' }}>_</span>
         </a>
 
-        {/* Links desktop — ocultos en mobile */}
         <ul
           className="hidden tablet:flex"
           style={{ gap: '24px', listStyle: 'none', margin: 0, padding: 0 }}
         >
           {navLinks.map((link) => (
-            <li key={link.href}>
+            <li key={link.anchor}>
               <a
-                href={link.href}
+                href={isRoot ? `#${link.anchor}` : `/#${link.anchor}`}
                 className="font-mono"
+                onClick={(e) => handleNavClick(e, link.anchor)}
                 style={{
                   fontSize:       '11px',
                   color:          'var(--color-text-muted)',
                   textDecoration: 'none',
                   transition:     'color 0.2s ease',
                 }}
-                onMouseEnter={e =>
-                  (e.currentTarget.style.color = 'var(--color-accent)')
-                }
-                onMouseLeave={e =>
-                  (e.currentTarget.style.color = 'var(--color-text-muted)')
-                }
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-accent)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-muted)')}
               >
                 {link.label}
               </a>
@@ -96,9 +123,7 @@ export function NavBar() {
           ))}
         </ul>
 
-        {/* Right side */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* CMD+K — siempre visible */}
           <button
             className="font-mono"
             aria-label="Abrir terminal AI"
@@ -127,7 +152,6 @@ export function NavBar() {
             CMD+K
           </button>
 
-          {/* Hamburger — solo mobile */}
           <button
             className="tablet:hidden font-mono"
             onClick={() => setMenuOpen(o => !o)}
@@ -151,32 +175,31 @@ export function NavBar() {
         </div>
       </nav>
 
-      {/* Mobile menu overlay */}
       {menuOpen && (
         <div
           role="dialog"
           aria-label="Navigation menu"
           style={{
-            position:        'fixed',
-            inset:           0,
-            zIndex:          999,
-            backgroundColor: 'rgba(30,31,41,0.97)',
-            backdropFilter:  'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-            display:         'flex',
-            flexDirection:   'column',
-            justifyContent:  'center',
-            alignItems:      'center',
-            gap:             '32px',
-            animation:       'slideUp 0.3s cubic-bezier(0.16,1,0.3,1) forwards',
+            position:            'fixed',
+            inset:               0,
+            zIndex:              999,
+            backgroundColor:     'rgba(30,31,41,0.97)',
+            backdropFilter:      'blur(16px)',
+            WebkitBackdropFilter:'blur(16px)',
+            display:             'flex',
+            flexDirection:       'column',
+            justifyContent:      'center',
+            alignItems:          'center',
+            gap:                 '32px',
+            animation:           'slideUp 0.3s cubic-bezier(0.16,1,0.3,1) forwards',
           }}
         >
           {navLinks.map((link, i) => (
             <a
-              key={link.href}
-              href={link.href}
+              key={link.anchor}
+              href={isRoot ? `#${link.anchor}` : `/#${link.anchor}`}
               className="font-mono"
-              onClick={closeMenu}
+              onClick={(e) => handleNavClick(e, link.anchor)}
               style={{
                 fontSize:       'clamp(16px, 5vw, 20px)',
                 fontWeight:     700,
@@ -186,12 +209,8 @@ export function NavBar() {
                 transition:     'color 0.2s ease',
                 animationDelay: `${i * 60}ms`,
               }}
-              onMouseEnter={e =>
-                (e.currentTarget.style.color = 'var(--color-accent)')
-              }
-              onMouseLeave={e =>
-                (e.currentTarget.style.color = 'var(--color-text-muted)')
-              }
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-accent)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-muted)')}
             >
               {link.label}
             </a>
