@@ -21,7 +21,7 @@ export const fontSize = {
     fluid:   'clamp(40px, 15vw, 72px)', // responsive sin media queries
   },
 
-  // Sección headers — struct Profile {}, class AutomationEnthusiast {}
+  // Sección headers — struct Profile {}, type AutomationEnthusiast {}
   sectionHeader: {
     desktop: '18px',
     mobile:  '14px',

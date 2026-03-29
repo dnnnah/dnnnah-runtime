@@ -18,9 +18,9 @@ const TAGS = [
   { label: 'LangChain',  style: 'tag-py' },
 ]
 
-export function ClassAutomation() {
+export function TypeAutomation() {
   return (
-    <div id="class-automation" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <div id="type-automation" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <CodeBlock delay={80}>
 
         {/* type Stack struct { */}

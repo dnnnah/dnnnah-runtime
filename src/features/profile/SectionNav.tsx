@@ -2,7 +2,7 @@
 
 const NAV_ITEMS = [
   { label: 'struct Profile',   href: '#struct-profile' },
-  { label: 'class Automation', href: '#class-automation' },
+  { label: 'type Automation', href: '#type-automation' },
   { label: 'experience[]',     href: '#experience' },
   { label: 'education[]',      href: '#education' },
   { label: 'certifications[]', href: '#certifications' },

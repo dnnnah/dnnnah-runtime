@@ -1,7 +1,7 @@
 'use client'
 
 import { StructProfile }        from './StructProfile'
-import { ClassAutomation }      from './ClassAutomation'
+import { TypeAutomation }      from './TypeAutomation'
 import { ExperienceBlock }      from './ExperienceBlock'
 import { EducationBlock }       from './EducationBlock'
 import { CertificationsBlock }  from './CertificationsBlock'
@@ -22,7 +22,7 @@ export function RightPanel() {
       }}
     >
       <StructProfile />
-      <ClassAutomation />
+      <TypeAutomation />
       <ExperienceBlock />
       <EducationBlock />
       <CertificationsBlock />
