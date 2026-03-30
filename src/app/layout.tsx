@@ -1,12 +1,9 @@
 import type { Metadata } from 'next'
 import { JetBrains_Mono } from 'next/font/google'
 import { EasterEggs }     from '@/shared/components/EasterEggs'
+import { TerminalModal }  from '@/features/terminal'
 import '@/app/globals.css'
 
-/**
- * JetBrains Mono — fuente del sistema para todo el UI.
- * Variable CSS: --font-jetbrains
- */
 const jetbrainsMono = JetBrains_Mono({
   subsets:  ['latin'],
   weight:   ['400', '500', '700'],
@@ -19,10 +16,6 @@ export const metadata: Metadata = {
   description: 'Senior Software Engineering Portfolio',
 }
 
-/**
- * Layout raíz — EasterEggs montado aquí para que funcione
- * en todas las rutas sin duplicar código.
- */
 export default function RootLayout({
   children,
 }: {
@@ -33,6 +26,7 @@ export default function RootLayout({
       <body className={jetbrainsMono.variable}>
         {children}
         <EasterEggs />
+        <TerminalModal />
       </body>
     </html>
   )

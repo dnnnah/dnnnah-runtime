@@ -42,7 +42,7 @@ export default async function ProjectPage({ params }: Props) {
             margin:        0,
             letterSpacing: '0.08em',
           }}>
-            <a href="/#bin-projects" style={{
+            <a href="/#bin-projects'" style={{
               color:          'var(--color-accent)',
               textDecoration: 'none',
             }}>
@@ -53,7 +53,7 @@ export default async function ProjectPage({ params }: Props) {
 
           {/* Botón de regreso */}
           <a
-            href="/#bin-projects"
+            href="#bin-projects"
             className="font-mono"
             style={{
               fontSize:       '10px',

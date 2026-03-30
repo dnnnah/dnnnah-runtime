@@ -145,6 +145,22 @@ body {
   }
 }
 
+@keyframes terminalOpen {
+  from {
+    opacity:   0;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  to {
+    opacity:   1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 /* ─── PANIC EASTER EGG ──────────────────────────────────── */
 body.panic {
   animation: panicFlash 2.5s ease-in-out forwards;
