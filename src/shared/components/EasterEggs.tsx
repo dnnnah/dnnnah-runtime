@@ -43,7 +43,7 @@ export function EasterEggs() {
       state.scrollDelta   += Math.abs(e.deltaY)
       state.lastTimestamp  = now
 
-      if (state.scrollDelta > 3000 && !state.active) {
+      if (state.scrollDelta > 8000 && !state.active) {
         state.active = true
         setShowPanic(true)
       }

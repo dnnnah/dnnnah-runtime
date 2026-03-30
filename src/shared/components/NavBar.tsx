@@ -50,7 +50,7 @@ export function NavBar() {
       }}>
 
         {/* Logo */}
-        <a href="/" className="font-mono" style={{
+        <a href="/#boot" className="font-mono" style={{
           fontWeight:     700,
           fontSize:       '13px',
           color:          'var(--color-accent)',

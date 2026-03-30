@@ -77,7 +77,7 @@ export function ProjectsSection() {
           color:         'var(--color-text-muted)',
           marginBottom:  '32px',
         }}>
-          // {projects.length} ejecutables desplegados · scroll horizontal para inspeccionar
+          // {projects.length} executables deployed · Horizontal scroll to inspect
         </p>
       </div>
 
