@@ -161,6 +161,28 @@ body {
   to   { opacity: 1; }
 }
 
+@keyframes rippleEffect {
+  from {
+    transform: scale(0);
+    opacity:   1;
+  }
+  to {
+    transform: scale(1);
+    opacity:   0;
+  }
+}
+
+@keyframes glitchShake {
+  0%   { transform: translateX(0); }
+  15%  { transform: translateX(-4px) skewX(-2deg); }
+  30%  { transform: translateX(4px)  skewX(2deg); }
+  45%  { transform: translateX(-3px) skewX(-1deg); }
+  60%  { transform: translateX(3px)  skewX(1deg); }
+  75%  { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+
+
 /* ─── PANIC EASTER EGG ──────────────────────────────────── */
 body.panic {
   animation: panicFlash 2.5s ease-in-out forwards;
@@ -487,6 +509,45 @@ body.panic {
       grid-template-columns: 1fr !important;
     }
   }
+
+  /* ─── CONTACT FORM ──────────────────────────────────────── */
+  .contact-input,
+  .contact-textarea {
+    width:         100%;
+    background:    transparent;
+    border:        none;
+    border-bottom: 1px solid var(--color-text-muted);
+    padding:       6px 0;
+    font-family:   inherit;
+    font-size:     clamp(10px, 2vw, 12px);
+    color:         var(--color-text);
+    outline:       none;
+    transition:    border-color 0.2s ease;
+  }
+  .contact-input:focus,
+  .contact-textarea:focus {
+    border-color: var(--color-accent);
+  }
+  .contact-input.error,
+  .contact-textarea.error {
+    border-color: var(--color-status-off);
+  }
+  .contact-input::placeholder,
+  .contact-textarea::placeholder {
+    color:   var(--color-text-disabled);
+    font-family: inherit;
+  }
+  .contact-textarea {
+    resize: none;
+  }
+
+  /* ─── CONTACT GRID ──────────────────────────────────────── */
+  @media (max-width: 767px) {
+    .contact-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
 }
 
 /* ─── SYNTAX HIGHLIGHTING ──────────────────────────────── */
