@@ -9,9 +9,9 @@ import { CodeBlock } from './CodeBlock'
 
 const EDUCATION = [
   {
-    degree:      'Lic. Desarrollo De Software',
-    institution: 'Universidad de Guadalajara',
-    year:        '2023 — presente',
+    degree:      'B.S. in Software Development',
+    institution: 'University of Guadalajara',
+    year:        '2023 — present',
   },
 ]
 

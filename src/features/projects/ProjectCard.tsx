@@ -114,7 +114,7 @@ export function ProjectCard({ project}: ProjectCardProps) {
             position:        'absolute',
             top:             '12px',
             left:            '12px',
-            backgroundColor: 'rgba(30, 31, 41, 0.85)',
+            backgroundColor: 'var(--color-bg-elevated)',
             backdropFilter:  'blur(4px)',
             padding:         '3px 8px',
             borderRadius:    '3px',

@@ -94,7 +94,7 @@ export function BootSection({ className = '' }: BootSectionProps) {
           color:     'var(--color-text-muted)',
           marginTop: '4px',
         }}>
-          Software Engineer · Automation Enthusiast · Go Runtime
+          Backend Engineer · Automation Enthusiast · Go Developer
         </p>
 
         {/* CTAs */}

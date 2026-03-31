@@ -42,21 +42,21 @@ export function TypeAutomation() {
           <span className="kw3">DB</span>
           <span className="val"> []</span>
           <span className="kw">string</span>
-          <span className="cm"> // ["PostgreSQL", "MySQL", "Supabase"]</span>
+          <span className="cm"> // ["PostgreSQL", "Supabase", "Vector Search"]</span>
         </div>
 
         <div style={{ paddingLeft: '20px' }}>
           <span className="kw3">Infra</span>
           <span className="val"> []</span>
           <span className="kw">string</span>
-          <span className="cm"> // ["Docker", "Linux", "macOS"]</span>
+          <span className="cm"> // ["Docker", "Linux", "Microservices"]</span>
         </div>
 
         <div style={{ paddingLeft: '20px' }}>
           <span className="kw3">AI</span>
           <span className="val"> []</span>
           <span className="kw">string</span>
-          <span className="cm"> // ["Claude", "Cursor", "Prompt Engineer"]</span>
+          <span className="cm"> // ["AI Tooling", "Context Management", "Prompt Engineering"]</span>
         </div>
 
         <div style={{ marginBottom: '12px' }}>
@@ -104,18 +104,18 @@ export function TypeAutomation() {
           <span className="val">: []</span>
           <span className="kw">string</span>
           <span className="val">{'{'}</span>
-          <span className="str">"Distributed Systems"</span>
+          <span className="str">"Scalable Microservices"</span>
           <span className="val">, </span>
-          <span className="str">"AI Agent Orchestration"</span>
+          <span className="str">""High-Performance Code""</span>
           <span className="val">, </span>
-          <span className="str">"Performance Optimization"</span>
+          <span className="str">"API Design & Strategy"</span>
           <span className="val">{'},'}</span>
         </div>
 
         <div style={{ paddingLeft: '20px' }}>
           <span className="kw3">Objective</span>
           <span className="val">: </span>
-          <span className="str">"Automate the mundane, empower the intelligent."</span>
+          <span className="str">"Simple solutions for complex problems. That's my backend"</span>
           <span className="val">,</span>
         </div>
 

@@ -404,7 +404,7 @@ body.panic {
   .card-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(30, 31, 41, 0.92);
+    background: var(--color-bg-surface);
     display: flex;
     align-items: center;
     justify-content: center;

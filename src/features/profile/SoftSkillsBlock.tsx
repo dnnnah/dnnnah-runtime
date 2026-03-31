@@ -12,10 +12,10 @@ export function SoftSkillsBlock() {
     <CodeBlock id="soft-skills" delay={400}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
         <span className="cm">// /dev/core-competencies:</span>
-        <span className="cm">// Deep diving into system internals,</span>
-        <span className="cm">// architecting resilient infrastructures,</span>
-        <span className="cm">// and pioneering AI-driven workflows.</span>
-        <span className="cm">// Always optimizing.</span>
+        <span className="cm">// Solving bottlenecks with solid logic,</span>
+        <span className="cm">// designing reliable data flows,</span>
+        <span className="cm">// and automating the repetitive to focus on the essential.</span>
+        <span className="cm">// Done is better than perfect, but optimized is best.</span>
       </div>
     </CodeBlock>
   )
