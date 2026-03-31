@@ -4,14 +4,6 @@ import { useEffect, useRef } from 'react'
 import Lenis from 'lenis'
 import { gsap, ScrollTrigger } from '@/shared/lib/gsap.config'
 
-/**
- * Inicializa Lenis para scroll suave en toda la app.
- * Sincronizado con GSAP ticker y ScrollTrigger.
- *
- * FIXES aplicados:
- * - require() → import ESM estático (fix bundle en producción)
- * - gsap.ticker.remove(onTick) en cleanup (fix memory leak)
- */
 export function useLenis() {
   const lenisRef = useRef<Lenis | null>(null)
 
@@ -25,15 +17,30 @@ export function useLenis() {
 
     lenisRef.current = lenis
 
-    // Guardamos referencia para poder remover el ticker en cleanup
     const onTick = (time: number) => lenis.raf(time * 1000)
 
     gsap.ticker.add(onTick)
     gsap.ticker.lagSmoothing(0)
-    lenis.on('scroll', ScrollTrigger.update)
+
+    // Sincronización correcta — Lenis notifica a ScrollTrigger
+    lenis.on('scroll', ({ scroll }: { scroll: number }) => {
+      ScrollTrigger.update()
+    })
+
+    // ScrollTrigger usa la posición real de Lenis
+    ScrollTrigger.scrollerProxy(document.body, {
+      scrollTop: () => lenis.scroll,
+      getBoundingClientRect: () => ({
+        top: 0, left: 0,
+        width: window.innerWidth,
+        height: window.innerHeight,
+      }),
+    })
+
+    ScrollTrigger.refresh()
 
     return () => {
-      gsap.ticker.remove(onTick) // ← sin esto, el ticker vive para siempre
+      gsap.ticker.remove(onTick)
       lenis.destroy()
       lenisRef.current = null
     }

@@ -16,7 +16,6 @@ export function ProjectsSection() {
         backgroundColor: 'var(--color-bg-base)',
         minHeight:       '100vh',
         paddingTop:      '56px',
-        overflow:        'hidden',
       }}
     >
       <div style={{ padding: 'clamp(32px, 5vw, 64px) clamp(24px, 5vw, 64px) 0' }}>
