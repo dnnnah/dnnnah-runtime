@@ -26,7 +26,8 @@ export interface Project {
   buildTime:    string
   stack:        string[]
   tags:         ProjectTag[]
-  screenshot:   string
+  screenshot:    string
+  screenshots?:  string[]
   demoUrl?:     string
   githubUrl:    string
   metrics:      ProjectMetrics

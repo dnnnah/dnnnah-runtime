@@ -1,6 +1,5 @@
 'use client'
 
-import { NavBar }       from '@/shared/components/NavBar'
 import { ContactForm }  from './ContactForm'
 import { SocialLinks }  from './SocialLinks'
 
@@ -31,7 +30,6 @@ export function ContactSection() {
         paddingTop:      '56px',
       }}
     >
-      <NavBar />
 
       <div style={{
         padding: 'clamp(32px, 5vw, 64px) clamp(24px, 5vw, 64px)',

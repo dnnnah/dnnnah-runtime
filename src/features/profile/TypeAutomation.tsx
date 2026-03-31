@@ -42,21 +42,21 @@ export function TypeAutomation() {
           <span className="kw3">DB</span>
           <span className="val"> []</span>
           <span className="kw">string</span>
-          <span className="cm"> // ["PostgreSQL", "Redis", "Supabase"]</span>
+          <span className="cm"> // ["PostgreSQL", "MySQL", "Supabase"]</span>
         </div>
 
         <div style={{ paddingLeft: '20px' }}>
           <span className="kw3">Infra</span>
           <span className="val"> []</span>
           <span className="kw">string</span>
-          <span className="cm"> // ["Docker", "RabbitMQ", "Linux"]</span>
+          <span className="cm"> // ["Docker", "Linux", "macOS"]</span>
         </div>
 
         <div style={{ paddingLeft: '20px' }}>
           <span className="kw3">AI</span>
           <span className="val"> []</span>
           <span className="kw">string</span>
-          <span className="cm"> // ["LangChain", "Vercel AI SDK"]</span>
+          <span className="cm"> // ["Claude", "Cursor", "Prompt Engineer"]</span>
         </div>
 
         <div style={{ marginBottom: '12px' }}>

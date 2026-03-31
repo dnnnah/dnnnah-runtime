@@ -3,7 +3,9 @@ import { notFound }    from 'next/navigation'
 import { NavBar }      from '@/shared/components/NavBar'
 import { MetricCard }  from '@/features/projects/MetricCard'
 import { StatusBadge } from '@/features/projects/StatusBadge'
-import ReactMarkdown   from 'react-markdown'
+import ReactMarkdown  from 'react-markdown'
+import rehypeHighlight from 'rehype-highlight'
+import 'highlight.js/styles/github-dark.css'
 import { ScrollToTop } from './ScrollToTop'
 
 interface Props {
@@ -42,7 +44,7 @@ export default async function ProjectPage({ params }: Props) {
             margin:        0,
             letterSpacing: '0.08em',
           }}>
-            <a href="/#bin-projects'" style={{
+            <a href="/#bin-projects" style={{
               color:          'var(--color-accent)',
               textDecoration: 'none',
             }}>
@@ -53,7 +55,7 @@ export default async function ProjectPage({ params }: Props) {
 
           {/* Botón de regreso */}
           <a
-            href="#bin-projects"
+            href="/#bin-projects"
             className="font-mono"
             style={{
               fontSize:       '10px',
@@ -172,7 +174,9 @@ export default async function ProjectPage({ params }: Props) {
                 lineHeight: 1.9,
                 color:      'var(--color-text)',
               }}>
-                <ReactMarkdown>{project.readme}</ReactMarkdown>
+                <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+                  {project.readme}
+                </ReactMarkdown>
               </div>
             </div>
 

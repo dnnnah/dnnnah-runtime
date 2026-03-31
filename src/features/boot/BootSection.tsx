@@ -10,7 +10,6 @@ import { useLenis } from '@/shared/hooks/useLenis'
 import type { BootSectionProps, PanicState } from './types'
 
 // 4. Feature components y hooks locales
-import { NavBar } from '@/shared/components/NavBar'
 import { useHeroReveal } from './useHeroReveal'
 
 /**
@@ -48,7 +47,6 @@ export function BootSection({ className = '' }: BootSectionProps) {
       onWheel={handleWheel}
       aria-label="Hero — DNNNAH Runtime"
     >
-      <NavBar />
 
       {/* Scanline overlay — efecto CRT sutil */}
       <div

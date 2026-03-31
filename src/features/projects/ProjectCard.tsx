@@ -21,10 +21,9 @@ const TAG_STYLES: Record<string, string> = {
 
 interface ProjectCardProps {
   project: Project
-  onOpen:  (project: Project) => void
 }
 
-export function ProjectCard({ project, onOpen }: ProjectCardProps) {
+export function ProjectCard({ project}: ProjectCardProps) {
   const router = useRouter()
 
   return (

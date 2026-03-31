@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { JetBrains_Mono } from 'next/font/google'
+import { NavBar }         from '@/shared/components/NavBar'
 import { EasterEggs }     from '@/shared/components/EasterEggs'
 import { TerminalModal }  from '@/features/terminal'
 import '@/app/globals.css'
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="dark" suppressHydrationWarning>
       <body className={jetbrainsMono.variable}>
+        <NavBar />
         {children}
         <EasterEggs />
         <TerminalModal />

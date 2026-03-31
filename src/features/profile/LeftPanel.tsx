@@ -104,7 +104,7 @@ export function LeftPanel({ activeSection = 'struct-profile' }: LeftPanelProps) 
               marginTop: '4px',
             }}
           >
-            ● Available for hire
+            ● Active
           </span>
         </div>
       </div>

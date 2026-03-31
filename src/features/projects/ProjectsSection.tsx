@@ -2,20 +2,9 @@
 
 import { projects }        from './data/projects'
 import { HorizontalTrack } from './HorizontalTrack'
-import { ProjectDetail }   from './ProjectDetail'
 import { StatusBadge }     from './StatusBadge'
-import { useProjectDetail } from './useProjectDetail'
-
-/**
- * Sección bin/projects — galería horizontal de proyectos.
- * Desktop: scroll horizontal con GSAP pin.
- * Mobile: columna vertical.
- */
 
 export function ProjectsSection() {
-  const { open, project, openDetail, closeDetail } = useProjectDetail()
-
-  // Conteo de proyectos por status
   const live     = projects.filter(p => p.status === 'live').length
   const building = projects.filter(p => p.status === 'building').length
   const offline  = projects.filter(p => p.status === 'offline').length
@@ -32,7 +21,6 @@ export function ProjectsSection() {
     >
       <div style={{ padding: 'clamp(32px, 5vw, 64px) clamp(24px, 5vw, 64px) 0' }}>
 
-        {/* Breadcrumb */}
         <p className="font-mono" style={{
           fontSize:      'clamp(9px, 2vw, 11px)',
           color:         'var(--color-text-muted)',
@@ -43,7 +31,6 @@ export function ProjectsSection() {
           bin/projects
         </p>
 
-        {/* Header */}
         <div style={{
           display:        'flex',
           justifyContent: 'space-between',
@@ -63,7 +50,6 @@ export function ProjectsSection() {
             <span style={{ color: 'var(--color-accent)' }}>_RUNTIME</span>
           </h2>
 
-          {/* Status badges */}
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <StatusBadge status="live"     count={live} />
             <StatusBadge status="building" count={building} />
@@ -71,27 +57,18 @@ export function ProjectsSection() {
           </div>
         </div>
 
-        {/* Subtitle */}
         <p className="font-mono" style={{
-          fontSize:      'clamp(10px, 2vw, 12px)',
-          color:         'var(--color-text-muted)',
-          marginBottom:  '32px',
+          fontSize:     'clamp(10px, 2vw, 12px)',
+          color:        'var(--color-text-muted)',
+          marginBottom: '32px',
         }}>
           // {projects.length} executables deployed · Horizontal scroll to inspect
         </p>
       </div>
 
-      {/* Track horizontal */}
       <div style={{ padding: '0 clamp(24px, 5vw, 64px)' }}>
-        <HorizontalTrack projects={projects} onOpen={openDetail} />
+        <HorizontalTrack projects={projects} />
       </div>
-
-      {/* Detail panel */}
-      <ProjectDetail
-        project={project}
-        open={open}
-        onClose={closeDetail}
-      />
     </section>
   )
 }
