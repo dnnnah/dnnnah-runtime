@@ -31,7 +31,7 @@ export function ProjectCard({ project}: ProjectCardProps) {
       onClick={() => router.push(`/projects/${project.id}`)}
       aria-label={project.title}
       style={{
-        width:           'clamp(340px, 38vw, 520px)',
+        width: 'clamp(320px, 78vw, 820px)',
         flexShrink:      0,
         cursor:          'pointer',
         backgroundColor: 'var(--color-bg-surface)',
@@ -53,7 +53,7 @@ export function ProjectCard({ project}: ProjectCardProps) {
       <div
         style={{
           position:        'relative',
-          height:          '220px',
+          height:          '280px',
           overflow:        'hidden',
           backgroundColor: 'var(--color-bg-elevated)',
         }}

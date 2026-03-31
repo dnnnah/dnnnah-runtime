@@ -7,30 +7,40 @@ export function useHorizontalScroll() {
   const trackRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const isMobile = window.innerWidth < 1024
-    if (isMobile || !trackRef.current) return
+    if (!trackRef.current) return
 
-    // Esperamos a que Lenis esté inicializado
-    const timeout = setTimeout(() => {
-      const ctx = gsap.context(() => {
-        gsap.to(trackRef.current, {
-          x:    () => -(trackRef.current!.scrollWidth - window.innerWidth + 96),
-          ease: 'none',
-          scrollTrigger: {
-            trigger:             '#bin-projects',
-            start:               'top top',
-            end:                 () => `+=${trackRef.current!.scrollWidth - window.innerWidth + 96}`,
-            pin:                 true,
-            scrub:               1,
-            invalidateOnRefresh: true,
-          },
-        })
+    const track   = trackRef.current
+    const section = document.getElementById('bin-projects')
+    if (!section) return
+
+    const getScrollAmount = () =>
+      -(track.scrollWidth - window.innerWidth)
+
+    const ctx = gsap.context(() => {
+      gsap.to(track, {
+        x:    getScrollAmount,
+        ease: 'none',
+        scrollTrigger: {
+          trigger:             section,
+          start:               'top top',
+          end: () => `+=${track.scrollWidth}`,
+          pin:                 true,
+          scrub:               1,
+          invalidateOnRefresh: true,
+        },
       })
+    })
 
-      return () => ctx.revert()
-    }, 300)
+    // Recalcula en resize y orientación
+    const onResize = () => ScrollTrigger.refresh()
+    window.addEventListener('resize', onResize)
+    window.addEventListener('orientationchange', onResize)
 
-    return () => clearTimeout(timeout)
+    return () => {
+      ctx.revert()
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('orientationchange', onResize)
+    }
   }, [])
 
   return trackRef

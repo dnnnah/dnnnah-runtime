@@ -15,9 +15,12 @@ export function HorizontalTrack({ projects }: HorizontalTrackProps) {
     <div
       ref={trackRef}
       style={{
-        display: 'flex',
-        gap:     '24px',
-        padding: '24px 0',
+        display:       'flex',
+        gap:           '32px',
+        paddingTop:    '24px',
+        paddingBottom: '24px',
+        paddingLeft:   'clamp(24px, 5vw, 64px)',
+        paddingRight:  'clamp(24px, 5vw, 64px)',
       }}
     >
       {projects.map((project) => (
@@ -26,6 +29,8 @@ export function HorizontalTrack({ projects }: HorizontalTrackProps) {
           project={project}
         />
       ))}
+      {/* Spacer final */}
+      <div style={{ flexShrink: 0, width: 'clamp(60px, 10vw, 120px)' }} />
     </div>
   )
 }

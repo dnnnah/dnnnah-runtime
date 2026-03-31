@@ -65,7 +65,7 @@ export function ProjectsSection() {
         </p>
       </div>
 
-      <div style={{ padding: '0 clamp(24px, 5vw, 64px)' }}>
+      <div style={{ padding: '0' }}>
         <HorizontalTrack projects={projects} />
       </div>
     </section>
