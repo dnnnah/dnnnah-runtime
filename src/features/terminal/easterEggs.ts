@@ -5,6 +5,8 @@ type EasterMap = Record<string, TerminalLine[]>
 /**
  * Respuestas ocultas del terminal.
  * Se evalúan antes que los comandos normales.
+ * NOTA: `exit` fue eliminado de aquí — su lógica vive
+ * en useTerminal.ts para manejar el efecto glitch.
  */
 export const EASTER_EGGS: EasterMap = {
 
@@ -70,8 +72,5 @@ export const EASTER_EGGS: EasterMap = {
     { id: 'v2', type: 'output',  content: '// good luck getting out. type :q! to escape.' },
   ],
 
-  'exit': [
-    { id: 'ex1', type: 'output', content: 'logout' },
-    { id: 'ex2', type: 'accent', content: '// closing terminal...' },
-  ],
+  // exit eliminado — manejado directamente en useTerminal.ts
 }

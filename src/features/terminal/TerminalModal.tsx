@@ -12,11 +12,11 @@ export function TerminalModal() {
     setState,
     execute,
     navigateHistory,
-    prompt,       // ← cwd dinámico del VFS
-    tabComplete,  // ← Tab completion VFS-aware
+    prompt,
+    tabComplete,
   } = useTerminal()
 
-  const { isOpen, lines } = state
+  const { isOpen, lines, isGlitching } = state
   const [minimized, setMinimized] = useState(false)
   const [maximized, setMaximized] = useState(false)
 
@@ -71,7 +71,7 @@ export function TerminalModal() {
 
   return createPortal(
     <>
-      {/* Overlay — no se muestra si minimizado */}
+      {/* Overlay */}
       {!minimized && (
         <div
           onClick={() => {
@@ -90,9 +90,14 @@ export function TerminalModal() {
         />
       )}
 
-      {/* Modal */}
-      <div role="dialog" aria-label="DNNNAH terminal" aria-modal="true" style={modalStyle}>
-
+      {/* Modal — clase terminal-glitch se aplica al ejecutar exit */}
+      <div
+        role="dialog"
+        aria-label="DNNNAH terminal"
+        aria-modal="true"
+        className={isGlitching ? 'terminal-glitch' : ''}
+        style={modalStyle}
+      >
         {/* Header */}
         <div style={{
           backgroundColor: 'var(--color-bg-elevated)',
@@ -103,9 +108,7 @@ export function TerminalModal() {
           justifyContent:  'space-between',
           flexShrink:      0,
         }}>
-          {/* Traffic lights */}
           <div style={{ display: 'flex', gap: '6px' }}>
-            {/* Rojo — cierra */}
             <button
               onClick={() => {
                 setState(s => ({ ...s, isOpen: false }))
@@ -121,12 +124,8 @@ export function TerminalModal() {
               onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
             />
-            {/* Amarillo — minimiza */}
             <button
-              onClick={() => {
-                setMinimized(m => !m)
-                setMaximized(false)
-              }}
+              onClick={() => { setMinimized(m => !m); setMaximized(false) }}
               aria-label="Minimizar terminal"
               title="Minimizar"
               style={{
@@ -136,12 +135,8 @@ export function TerminalModal() {
               onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
             />
-            {/* Verde — maximiza */}
             <button
-              onClick={() => {
-                setMaximized(m => !m)
-                setMinimized(false)
-              }}
+              onClick={() => { setMaximized(m => !m); setMinimized(false) }}
               aria-label="Maximizar terminal"
               title="Maximizar"
               style={{
@@ -162,7 +157,7 @@ export function TerminalModal() {
           </span>
         </div>
 
-        {/* Body — oculto si minimizado */}
+        {/* Body */}
         {!minimized && (
           <>
             <TerminalOutput lines={lines} />

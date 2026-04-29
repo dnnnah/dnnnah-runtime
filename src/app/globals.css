@@ -145,7 +145,7 @@ body {
   100% { transform: translateX(0); }
 }
 
-/* ─── EASTER EGG ────────────────────────────────────────── */
+ /* ─── EASTER EGG ────────────────────────────────────────── */
 body.panic { animation: panicFlash 2.5s ease-in-out forwards; }
 
 /* ─── SCROLLBAR ─────────────────────────────────────────── */

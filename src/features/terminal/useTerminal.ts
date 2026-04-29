@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { COMMANDS }    from './commands'
-import { EASTER_EGGS } from './easterEggs'
+import { COMMANDS, createTopLines } from './commands'
+import { EASTER_EGGS }              from './easterEggs'
 import {
   VFS_ROOT,
   cwdPrompt,
@@ -13,13 +13,30 @@ import {
 } from './vfs'
 import type { TerminalLine, TerminalState, VFSState } from './types'
 
-// ─── Mensajes de bienvenida ───────────────────────────────────────────────────
+// ─── Secuencia SSH intro ──────────────────────────────────────────────────────
 
-const WELCOME_LINES: TerminalLine[] = [
-  { id: 'w1', type: 'accent',  content: 'DNNNAH_RUNTIME terminal v1.0.0' },
-  { id: 'w2', type: 'output',  content: 'Type help to see available commands.' },
-  { id: 'w3', type: 'pink',    content: '// hint: try ls -la for something interesting...' },
-]
+/**
+ * Genera las líneas de bienvenida SSH con la fecha real del sistema.
+ * Se llama una sola vez, en la primera apertura.
+ */
+function buildSshLines(): TerminalLine[] {
+  const now      = new Date()
+  const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const months   = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+  // Formato: "Mon Jan  2 15:04:05 2006" (Go-style, doble espacio si día < 10)
+  const day  = now.getDate()
+  const time = now.toTimeString().slice(0, 8)
+  const dateStr = `${weekdays[now.getDay()]} ${months[now.getMonth()]} ${day < 10 ? ' ' + day : day} ${time} ${now.getFullYear()}`
+
+  return [
+    { id: 'ssh1', type: 'output',  content: 'Connecting to dnnnah.io via SSH...' },
+    { id: 'ssh2', type: 'accent',  content: 'Connected. Authenticating...' },
+    { id: 'ssh3', type: 'success', content: `Welcome, recruiter. Last login: ${dateStr}` },
+    { id: 'ssh4', type: 'pink',    content: '// Type help to see available commands.' },
+  ]
+}
 
 // ─── Hook principal ───────────────────────────────────────────────────────────
 
@@ -35,20 +52,39 @@ const WELCOME_LINES: TerminalLine[] = [
  */
 export function useTerminal() {
   const [state, setState] = useState<TerminalState>({
-    lines:      WELCOME_LINES,
-    input:      '',
-    history:    [],
-    historyIdx: -1,
-    isOpen:     false,
+    lines:        [],
+    input:        '',
+    history:      [],
+    historyIdx:   -1,
+    isOpen:       false,
+    hasConnected: false,   // flag de primera conexión
+    isGlitching:  false,   // flag de efecto glitch
   })
 
-  // Estado del VFS: separado del TerminalState para mantener SOLID
   const [vfsState, setVfsState] = useState<VFSState>({
-    cwd:  [],          // empieza en root (~)
+    cwd:  [],
     root: VFS_ROOT,
   })
 
-  // ── Atajos de teclado para abrir/cerrar ────────────────────────────────
+  // ── SSH intro en la primera apertura ──────────────────────────────────────
+  useEffect(() => {
+    if (!state.isOpen) return          // solo cuando se abre
+    if (state.hasConnected) return     // solo la primera vez
+
+    const sshLines = buildSshLines()
+    const DELAYS   = [0, 300, 600, 900] // ms entre cada línea
+
+    // Marcamos hasConnected de inmediato para evitar re-ejecuciones
+    setState(s => ({ ...s, hasConnected: true, lines: [] }))
+
+    sshLines.forEach((line, i) => {
+      setTimeout(() => {
+        setState(s => ({ ...s, lines: [...s.lines, line] }))
+      }, DELAYS[i])
+    })
+  }, [state.isOpen]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Atajos de teclado ─────────────────────────────────────────────────────
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -60,7 +96,6 @@ export function useTerminal() {
       }
     }
 
-    // Evento personalizado para el botón del NavBar
     function onOpenTerminal() {
       setState(s => ({ ...s, isOpen: !s.isOpen }))
     }
@@ -73,28 +108,26 @@ export function useTerminal() {
     }
   }, [])
 
-  // Bloquea scroll del body cuando el terminal está abierto
+  // ── Bloquear scroll del body ───────────────────────────────────────────────
   useEffect(() => {
     document.body.style.overflow = state.isOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [state.isOpen])
 
-  // ── Ejecución de comandos ──────────────────────────────────────────────
+  // ── Ejecución de comandos ──────────────────────────────────────────────────
   const execute = useCallback((cmd: string, currentVfsState: VFSState) => {
     const trimmed = cmd.trim()
     if (trimmed === '') return
 
-    // Guardamos el lower para los lookups, pero el original para mensajes
     const lower = trimmed.toLowerCase()
 
-    // Línea de prompt (lo que el usuario escribió)
     const promptLine: TerminalLine = {
       id:      Date.now() + 'p',
       type:    'prompt',
       content: trimmed,
     }
 
-    // ── 1. Comando especial: clear ───────────────────────────────────────
+    // ── 1. clear ─────────────────────────────────────────────────────────────
     if (lower === 'clear') {
       setState(s => ({
         ...s,
@@ -106,76 +139,83 @@ export function useTerminal() {
       return
     }
 
+    // ── 2. exit — efecto glitch antes de cerrar ───────────────────────────────
+    if (lower === 'exit') {
+      const exitLines: TerminalLine[] = [
+        { id: `ex-${Date.now()}-1`, type: 'output', content: 'logout' },
+        { id: `ex-${Date.now()}-2`, type: 'error',  content: 'Connection to dnnnah.io closed.' },
+        { id: `ex-${Date.now()}-3`, type: 'error',  content: '// signal: killed' },
+      ]
+      setState(s => ({
+        ...s,
+        lines:       [...s.lines, promptLine, ...exitLines],
+        input:       '',
+        history:     [lower, ...s.history],
+        historyIdx:  -1,
+        isGlitching: true,
+      }))
+      // Después de la animación (600ms) cierra el modal
+      setTimeout(() => {
+        setState(s => ({ ...s, isOpen: false, isGlitching: false }))
+      }, 600)
+      return
+    }
+
+    // ── 3. top — comando dinámico (factory) ───────────────────────────────────
+    if (lower === 'top') {
+      const topLines = createTopLines()
+      setState(s => ({
+        ...s,
+        lines:      [...s.lines, promptLine, ...topLines],
+        input:      '',
+        history:    [lower, ...s.history],
+        historyIdx: -1,
+      }))
+      return
+    }
+
     let outputLines: TerminalLine[] = []
     let nextVfsState: VFSState = currentVfsState
 
-    // ── 2. Interceptar comandos VFS ──────────────────────────────────────
-
-    // cd <target> — cambiar directorio
+    // ── 4. Comandos VFS ───────────────────────────────────────────────────────
     if (lower === 'cd' || lower.startsWith('cd ')) {
-      const target = trimmed.slice(3).trim() // preserva case para directorios
+      const target = trimmed.slice(3).trim()
       const result = vfsCd(currentVfsState, target || '~')
-
       if ('error' in result) {
         outputLines = [{ id: Date.now() + 'cde', type: 'error', content: result.error }]
       } else {
         nextVfsState = { ...currentVfsState, cwd: result.cwd }
-        // cd no produce output (comportamiento UNIX estándar)
-        outputLines = []
+        outputLines  = []
       }
     }
-
-    // ls -la — listar con archivos ocultos
     else if (lower === 'ls -la' || lower === 'ls -al') {
-      // -la en root mantiene los easter eggs existentes desde EASTER_EGGS
-      if (currentVfsState.cwd.length === 0) {
-        // En root delegamos al easter egg original para mantener el contenido
-        outputLines = EASTER_EGGS['ls -la'] ?? []
-      } else {
-        outputLines = vfsLs(currentVfsState, true)
-      }
+      outputLines = currentVfsState.cwd.length === 0
+        ? (EASTER_EGGS['ls -la'] ?? [])
+        : vfsLs(currentVfsState, true)
     }
-
-    // ls — listar directorio actual (sin ocultos)
     else if (lower === 'ls') {
-      // En root delegamos a COMMANDS['ls'] para mantener el output original
-      if (currentVfsState.cwd.length === 0) {
-        outputLines = COMMANDS['ls'] ?? []
-      } else {
-        outputLines = vfsLs(currentVfsState, false)
-      }
+      outputLines = currentVfsState.cwd.length === 0
+        ? (COMMANDS['ls'] ?? [])
+        : vfsLs(currentVfsState, false)
     }
-
-    // cat <filename> — mostrar contenido de archivo
     else if (lower.startsWith('cat ')) {
-      const filename = trimmed.slice(4).trim()
-
-      // Si estamos en root y el cat tiene un handler en COMMANDS o EASTER_EGGS,
-      // lo dejamos pasar al lookup normal (cat stack, cat about, cat .secrets).
-      const hasBuiltin =
-        EASTER_EGGS[lower] !== undefined || COMMANDS[lower] !== undefined
-
+      const filename   = trimmed.slice(4).trim()
+      const hasBuiltin = EASTER_EGGS[lower] !== undefined || COMMANDS[lower] !== undefined
       if (currentVfsState.cwd.length === 0 && hasBuiltin) {
-        // Deja que caiga al lookup de EASTER_EGGS / COMMANDS abajo
         outputLines = EASTER_EGGS[lower] ?? COMMANDS[lower] ?? []
       } else {
         outputLines = vfsCat(currentVfsState, filename)
       }
     }
 
-    // ── 3. Easter eggs (tienen prioridad sobre COMMANDS) ─────────────────
+    // ── 5. Easter eggs ────────────────────────────────────────────────────────
     else if (EASTER_EGGS[lower]) {
       outputLines = EASTER_EGGS[lower]
-      if (lower === 'exit') {
-        setTimeout(() => setState(s => ({ ...s, isOpen: false })), 800)
-      }
     }
 
-    // ── 4. Comandos normales ─────────────────────────────────────────────
+    // ── 6. Comandos normales ──────────────────────────────────────────────────
     else if (COMMANDS[lower]) {
       outputLines = COMMANDS[lower]
-
-      // Navegación a proyectos (comportamiento original)
       const routes: Record<string, string> = {
         'open project pwa': '/projects/pwa-catalog',
         'open project ai':  '/projects/ai-agent-runtime',
@@ -183,12 +223,10 @@ export function useTerminal() {
         'open project cli': '/projects/cli-devtools',
       }
       const route = routes[lower]
-      if (route) {
-        setTimeout(() => { window.location.href = route }, 800)
-      }
+      if (route) setTimeout(() => { window.location.href = route }, 800)
     }
 
-    // ── 5. Comando no encontrado ─────────────────────────────────────────
+    // ── 7. Comando no encontrado ──────────────────────────────────────────────
     else {
       outputLines = [{
         id:      Date.now() + 'e',
@@ -197,12 +235,8 @@ export function useTerminal() {
       }]
     }
 
-    // Actualizar VFS si cambió (ej: después de cd)
-    if (nextVfsState !== currentVfsState) {
-      setVfsState(nextVfsState)
-    }
+    if (nextVfsState !== currentVfsState) setVfsState(nextVfsState)
 
-    // Actualizar estado del terminal
     setState(s => ({
       ...s,
       lines:      [...s.lines, promptLine, ...outputLines],
@@ -210,49 +244,34 @@ export function useTerminal() {
       history:    [lower, ...s.history],
       historyIdx: -1,
     }))
-  }, []) // sin dependencias: usamos el argumento currentVfsState para evitar stale closures
+  }, [])
 
-  // ── Navegación del historial ───────────────────────────────────────────
+  // ── Navegación del historial ───────────────────────────────────────────────
   const navigateHistory = useCallback((direction: 'up' | 'down') => {
     setState(s => {
       const max = s.history.length - 1
       const idx = direction === 'up'
         ? Math.min(s.historyIdx + 1, max)
         : Math.max(s.historyIdx - 1, -1)
-      return {
-        ...s,
-        historyIdx: idx,
-        input:      idx === -1 ? '' : s.history[idx],
-      }
+      return { ...s, historyIdx: idx, input: idx === -1 ? '' : s.history[idx] }
     })
   }, [])
 
-  /**
-   * Tab completion para TerminalInput.
-   * Recibe el texto parcial, busca en el VFS actual y en AUTOCOMPLETE.
-   * Retorna el texto completado (o el mismo si no hay match).
-   */
   const tabComplete = useCallback((partial: string): string => {
     if (!partial) return partial
-
-    // Si el usuario está escribiendo 'cd ' + algo → completar con directorios del VFS
     if (partial.startsWith('cd ')) {
-      const fragment = partial.slice(3)
+      const fragment  = partial.slice(3)
       const completed = vfsTabComplete(vfsState, fragment)
       return completed !== fragment ? `cd ${completed}` : partial
     }
-
-    // Si el usuario está escribiendo 'cat ' + algo → completar con archivos del VFS
     if (partial.startsWith('cat ')) {
-      const fragment = partial.slice(4)
+      const fragment  = partial.slice(4)
       const completed = vfsTabComplete(vfsState, fragment, true)
       return completed !== fragment ? `cat ${completed}` : partial
     }
-
-    // Fallback: completar contra los comandos builtin
     const BUILTIN = [
       'help', 'whoami', 'pwd', 'ls', 'ls projects', 'ls -la',
-      'cat stack', 'cat about', 'contact', 'cv', 'clear',
+      'cat stack', 'cat about', 'contact', 'cv', 'clear', 'top',
       'easter', 'hint', 'konami', 'panic', 'exit',
       'open project pwa', 'open project ai',
       'open project mq', 'open project cli',
@@ -262,10 +281,6 @@ export function useTerminal() {
     return match ?? partial
   }, [vfsState])
 
-  /**
-   * Prompt string reactivo. Se actualiza cuando cambia el cwd.
-   * Ejemplo: '~'  →  '~/bin'  →  '~/bin/projects'
-   */
   const prompt = cwdPrompt(vfsState.cwd)
 
   return {
@@ -273,7 +288,7 @@ export function useTerminal() {
     setState,
     vfsState,
     prompt,
-    execute: (cmd: string) => execute(cmd, vfsState),
+    execute:         (cmd: string) => execute(cmd, vfsState),
     tabComplete,
     navigateHistory,
   }

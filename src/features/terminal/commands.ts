@@ -2,6 +2,41 @@ import type { TerminalLine } from './types'
 
 type CommandMap = Record<string, TerminalLine[]>
 
+// ─── Uptime del módulo (se fija al importar por primera vez) ─────────────────
+const SESSION_START = Date.now()
+
+/** Formatea milisegundos en "Xh Ym Zs" o "Ym Zs" o "Zs". */
+function formatUptime(ms: number): string {
+  const totalSec = Math.floor(ms / 1000)
+  const h = Math.floor(totalSec / 3600)
+  const m = Math.floor((totalSec % 3600) / 60)
+  const s = totalSec % 60
+  if (h > 0) return `${h}h ${m}m ${s}s`
+  if (m > 0) return `${m}m ${s}s`
+  return `${s}s`
+}
+
+/**
+ * Factory dinámica para el comando `top`.
+ * Se llama en el momento de ejecutar, no al importar,
+ * para que los valores sean siempre frescos.
+ */
+export function createTopLines(): TerminalLine[] {
+  const uptime     = formatUptime(Date.now() - SESSION_START)
+  const goroutines = Math.floor(Math.random() * (64 - 38 + 1)) + 38
+  const loadAvg    = (Math.random() * (2.4 - 0.8) + 0.8).toFixed(2)
+
+  return [
+    { id: `top-${Date.now()}-1`, type: 'accent',  content: 'DNNNAH_RUNTIME — process monitor' },
+    { id: `top-${Date.now()}-2`, type: 'output',  content: `Uptime:       ${uptime}` },
+    { id: `top-${Date.now()}-3`, type: 'accent',  content: `Goroutines:   ${goroutines}` },
+    { id: `top-${Date.now()}-4`, type: 'output',  content: 'Heap:         248 KB allocated' },
+    { id: `top-${Date.now()}-5`, type: 'success', content: `Load avg:     ${loadAvg} // caffeine-driven` },
+    { id: `top-${Date.now()}-6`, type: 'output',  content: 'Status:       ● available for hire' },
+    { id: `top-${Date.now()}-7`, type: 'pink',    content: '// press Ctrl+C to... just kidding. type clear to exit.' },
+  ]
+}
+
 /**
  * Mapa de comandos disponibles en el terminal.
  * Cada comando retorna un array de líneas a mostrar.
@@ -18,9 +53,10 @@ export const COMMANDS: CommandMap = {
     { id: 'h7',  type: 'success', content: '  contact        — how to reach me' },
     { id: 'h8',  type: 'success', content: '  cv             — download CV' },
     { id: 'h9',  type: 'success', content: '  pwd            — current location' },
-    { id: 'h10', type: 'success', content: '  clear          — clear terminal' },
-    { id: 'h11', type: 'success', content: '  easter         — hint list' },
-    { id: 'h12', type: 'pink',    content: '// try ls -la for something interesting...' },
+    { id: 'h10', type: 'success', content: '  top            — process monitor' },
+    { id: 'h11', type: 'success', content: '  clear          — clear terminal' },
+    { id: 'h12', type: 'success', content: '  easter         — hint list' },
+    { id: 'h13', type: 'pink',    content: '// try ls -la for something interesting...' },
   ],
 
   whoami: [
@@ -108,7 +144,7 @@ export const COMMANDS: CommandMap = {
     { id: 'e3', type: 'pink', content: '2. try: git log --oneline' },
     { id: 'e4', type: 'pink', content: '3. try: sudo make me a sandwich' },
     { id: 'e5', type: 'pink', content: '4. try: ping google.com' },
-    { id: 'e6', type: 'pink', content: '5. press: ↑↑↓↓←→←→BA anywhere on the page' },
+    { id: 'e6', type: 'pink', content: '5. press: ↑↑↓↓←→←→BA anywhere on la página' },
     { id: 'e7', type: 'pink', content: '6. scroll really fast to trigger panic()' },
   ],
 
