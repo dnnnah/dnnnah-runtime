@@ -3,45 +3,59 @@
 import { useRef, useEffect } from 'react'
 
 /**
- * Input del terminal con historial y autocompletado.
- * ↑↓ navega el historial.
- * Tab autocompleta comandos.
+ * Input del terminal con historial y autocompletado VFS.
+ *
+ * ↑↓  → navega el historial de comandos
+ * Tab → autocompleta usando VFS + comandos builtin
+ *
+ * Props:
+ *   prompt    — string del cwd actual (ej: '~', '~/bin')
+ *   onTab     — función que recibe texto parcial y retorna texto completado
  */
-
-const AUTOCOMPLETE = [
-  'help', 'whoami', 'pwd', 'ls', 'ls projects', 'ls -la',
-  'cat stack', 'cat about', 'contact', 'cv', 'clear',
-  'easter', 'hint', 'konami', 'panic', 'exit',
-  'open project pwa', 'open project ai',
-  'open project mq', 'open project cli',
-]
 
 interface Props {
   value:      string
+  prompt:     string                            // ← NUEVO: cwd dinámico
   onChange:   (v: string) => void
   onExecute:  (cmd: string) => void
   onNavigate: (dir: 'up' | 'down') => void
+  onTab:      (partial: string) => string       // ← NUEVO: Tab completion
 }
 
-export function TerminalInput({ value, onChange, onExecute, onNavigate }: Props) {
+export function TerminalInput({
+  value,
+  prompt,
+  onChange,
+  onExecute,
+  onNavigate,
+  onTab,
+}: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Auto-focus al montar
+  // Auto-focus al montar (y re-focus cuando el modal abre)
   useEffect(() => { inputRef.current?.focus() }, [])
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
-      onExecute(value)
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault()
-      onNavigate('up')
-    } else if (e.key === 'ArrowDown') {
-      e.preventDefault()
-      onNavigate('down')
-    } else if (e.key === 'Tab') {
-      e.preventDefault()
-      const match = AUTOCOMPLETE.find(c => c.startsWith(value) && c !== value)
-      if (match) onChange(match)
+    switch (e.key) {
+      case 'Enter':
+        onExecute(value)
+        break
+
+      case 'ArrowUp':
+        e.preventDefault()
+        onNavigate('up')
+        break
+
+      case 'ArrowDown':
+        e.preventDefault()
+        onNavigate('down')
+        break
+
+      case 'Tab':
+        e.preventDefault()
+        // Delega la lógica al hook — el input solo recibe el resultado
+        onChange(onTab(value))
+        break
     }
   }
 
@@ -55,7 +69,7 @@ export function TerminalInput({ value, onChange, onExecute, onNavigate }: Props)
       backgroundColor: 'var(--color-bg-base)',
       flexShrink:      0,
     }}>
-      {/* Prompt */}
+      {/* Prompt dinámico — refleja el cwd actual del VFS */}
       <span className="font-mono" style={{
         fontSize:   '11px',
         whiteSpace: 'nowrap',
@@ -63,7 +77,7 @@ export function TerminalInput({ value, onChange, onExecute, onNavigate }: Props)
       }}>
         <span style={{ color: 'var(--color-accent)' }}>dnnnah@runtime</span>
         <span style={{ color: 'var(--color-text-muted)' }}>:</span>
-        <span style={{ color: 'var(--color-accent-cyan)' }}>~</span>
+        <span style={{ color: 'var(--color-accent-cyan)' }}>{prompt}</span>
         <span style={{ color: 'var(--color-text-muted)' }}>$ </span>
       </span>
 
@@ -78,14 +92,14 @@ export function TerminalInput({ value, onChange, onExecute, onNavigate }: Props)
         autoCapitalize="off"
         aria-label="Terminal input"
         style={{
-          flex:        1,
-          background:  'transparent',
-          border:      'none',
-          outline:     'none',
-          fontFamily:  'inherit',
-          fontSize:    '11px',
-          color:       'var(--color-text)',
-          caretColor:  'var(--color-accent)',
+          flex:       1,
+          background: 'transparent',
+          border:     'none',
+          outline:    'none',
+          fontFamily: 'inherit',
+          fontSize:   '11px',
+          color:      'var(--color-text)',
+          caretColor: 'var(--color-accent)',
         }}
       />
     </div>

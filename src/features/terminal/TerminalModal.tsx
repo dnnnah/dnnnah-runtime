@@ -1,122 +1,99 @@
 'use client'
 
-import { createPortal }  from 'react-dom'
-import { useState }      from 'react'
-import { useTerminal }   from './useTerminal'
-import { TerminalInput } from './TerminalInput'
+import { createPortal }   from 'react-dom'
+import { useState }       from 'react'
+import { useTerminal }    from './useTerminal'
+import { TerminalInput }  from './TerminalInput'
 import { TerminalOutput } from './TerminalOutput'
 
-/**
- * Modal del terminal sys/terminal.
- *
- * Responsive fixes:
- * - dvh en lugar de vh — descuenta la barra del browser en mobile
- * - env(safe-area-inset-bottom) en el input — no lo tapa el teclado iOS
- * - calc(100vw - 32px) — margen garantizado en pantallas ≤ 375px
- */
-
-type ModalState = 'normal' | 'minimized' | 'maximized'
-
-/** Devuelve los estilos del modal según su estado */
-function getModalStyle(state: ModalState): React.CSSProperties {
-  const base: React.CSSProperties = {
-    position:        'fixed',
-    zIndex:          9998,
-    backgroundColor: 'var(--color-bg-surface)',
-    border:          '1px solid var(--color-border)',
-    borderRadius:    '8px',
-    overflow:        'hidden',
-    display:         'flex',
-    flexDirection:   'column',
-  }
-
-  if (state === 'maximized') {
-    return {
-      ...base,
-      top:    '5dvh',
-      left:   '5vw',
-      right:  '5vw',
-      bottom: '5dvh',
-    }
-  }
-
-  if (state === 'minimized') {
-    return {
-      ...base,
-      bottom:    '24px',
-      left:      '50%',
-      transform: 'translateX(-50%)',
-      width:     'min(680px, calc(100vw - 32px))',
-    }
-  }
-
-  /* normal */
-  return {
-    ...base,
-    top:       '50%',
-    left:      '50%',
-    transform: 'translate(-50%, -50%)',
-    width:     'min(680px, calc(100vw - 32px))',
-    /*
-      dvh (dynamic viewport height) descuenta la barra del browser
-      en Chrome/Safari mobile. 85vh en desktop donde dvh = vh.
-    */
-    height:    'min(480px, 80dvh)',
-    animation: 'terminalOpen 0.2s cubic-bezier(0.16,1,0.3,1) forwards',
-  }
-}
-
 export function TerminalModal() {
-  const { state, setState, execute, navigateHistory } = useTerminal()
-  const { isOpen, lines } = state
+  const {
+    state,
+    setState,
+    execute,
+    navigateHistory,
+    prompt,       // ← cwd dinámico del VFS
+    tabComplete,  // ← Tab completion VFS-aware
+  } = useTerminal()
 
-  const [uiState, setUiState] = useState<ModalState>('normal')
+  const { isOpen, lines } = state
+  const [minimized, setMinimized] = useState(false)
+  const [maximized, setMaximized] = useState(false)
 
   if (!isOpen) return null
 
-  function close() {
-    setState(s => ({ ...s, isOpen: false }))
-    setUiState('normal')
-  }
-
-  function toggleMinimize() {
-    setUiState(s => s === 'minimized' ? 'normal' : 'minimized')
-  }
-
-  function toggleMaximize() {
-    setUiState(s => s === 'maximized' ? 'normal' : 'maximized')
-  }
-
-  const isMinimized = uiState === 'minimized'
-  const isMaximized = uiState === 'maximized'
+  const modalStyle: React.CSSProperties = maximized
+    ? {
+        position:        'fixed',
+        top:             '5vh',
+        left:            '5vw',
+        right:           '5vw',
+        bottom:          '5vh',
+        zIndex:          9998,
+        backgroundColor: 'var(--color-bg-surface)',
+        border:          '1px solid var(--color-border)',
+        borderRadius:    '8px',
+        overflow:        'hidden',
+        display:         'flex',
+        flexDirection:   'column',
+      }
+    : minimized
+    ? {
+        position:        'fixed',
+        bottom:          '24px',
+        left:            '50%',
+        transform:       'translateX(-50%)',
+        zIndex:          9998,
+        width:           'min(680px, 92vw)',
+        backgroundColor: 'var(--color-bg-surface)',
+        border:          '1px solid var(--color-border)',
+        borderRadius:    '8px',
+        overflow:        'hidden',
+        display:         'flex',
+        flexDirection:   'column',
+      }
+    : {
+        position:        'fixed',
+        top:             '50%',
+        left:            '50%',
+        transform:       'translate(-50%, -50%)',
+        zIndex:          9998,
+        width:           'min(680px, 92vw)',
+        height:          'min(520px, 85vh)',
+        backgroundColor: 'var(--color-bg-surface)',
+        border:          '1px solid var(--color-border)',
+        borderRadius:    '8px',
+        overflow:        'hidden',
+        display:         'flex',
+        flexDirection:   'column',
+        animation:       'terminalOpen 0.2s cubic-bezier(0.16,1,0.3,1) forwards',
+      }
 
   return createPortal(
     <>
-      {/* Overlay — oculto si minimizado */}
-      {!isMinimized && (
+      {/* Overlay — no se muestra si minimizado */}
+      {!minimized && (
         <div
-          onClick={close}
-          aria-hidden="true"
+          onClick={() => {
+            setState(s => ({ ...s, isOpen: false }))
+            setMinimized(false)
+            setMaximized(false)
+          }}
           style={{
             position:        'fixed',
             inset:           0,
             zIndex:          9997,
             backgroundColor: 'rgba(0, 0, 0, 0.6)',
             backdropFilter:  'blur(8px)',
-            WebkitBackdropFilter: 'blur(8px)',
             animation:       'fadeIn 0.2s ease forwards',
           }}
         />
       )}
 
       {/* Modal */}
-      <div
-        role="dialog"
-        aria-label="DNNNAH terminal"
-        aria-modal="true"
-        style={getModalStyle(uiState)}
-      >
-        {/* ── Header ─────────────────────────────────────── */}
+      <div role="dialog" aria-label="DNNNAH terminal" aria-modal="true" style={modalStyle}>
+
+        {/* Header */}
         <div style={{
           backgroundColor: 'var(--color-bg-elevated)',
           borderBottom:    '1px solid var(--color-border)',
@@ -128,9 +105,52 @@ export function TerminalModal() {
         }}>
           {/* Traffic lights */}
           <div style={{ display: 'flex', gap: '6px' }}>
-            <TrafficLight color="#ff5555" label="Cerrar"    onClick={close} />
-            <TrafficLight color="#f1fa8c" label="Minimizar" onClick={toggleMinimize} />
-            <TrafficLight color="#50fa7b" label="Maximizar" onClick={toggleMaximize} />
+            {/* Rojo — cierra */}
+            <button
+              onClick={() => {
+                setState(s => ({ ...s, isOpen: false }))
+                setMinimized(false)
+                setMaximized(false)
+              }}
+              aria-label="Cerrar terminal"
+              title="Cerrar"
+              style={{
+                width: '12px', height: '12px', borderRadius: '50%',
+                background: '#ff5555', border: 'none', cursor: 'pointer', padding: 0,
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            />
+            {/* Amarillo — minimiza */}
+            <button
+              onClick={() => {
+                setMinimized(m => !m)
+                setMaximized(false)
+              }}
+              aria-label="Minimizar terminal"
+              title="Minimizar"
+              style={{
+                width: '12px', height: '12px', borderRadius: '50%',
+                background: '#f1fa8c', border: 'none', cursor: 'pointer', padding: 0,
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            />
+            {/* Verde — maximiza */}
+            <button
+              onClick={() => {
+                setMaximized(m => !m)
+                setMinimized(false)
+              }}
+              aria-label="Maximizar terminal"
+              title="Maximizar"
+              style={{
+                width: '12px', height: '12px', borderRadius: '50%',
+                background: '#50fa7b', border: 'none', cursor: 'pointer', padding: 0,
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            />
           </div>
 
           <span className="font-mono" style={{ fontSize: '10px', color: 'var(--color-text-muted)' }}>
@@ -138,54 +158,26 @@ export function TerminalModal() {
           </span>
 
           <span className="font-mono" style={{ fontSize: '9px', color: 'var(--color-text-muted)' }}>
-            {isMinimized ? '[ minimized ]' : isMaximized ? '[ fullscreen ]' : '[ ESC to close ]'}
+            {minimized ? '[ minimized ]' : maximized ? '[ fullscreen ]' : '[ ESC to close ]'}
           </span>
         </div>
 
-        {/* ── Body — oculto si minimizado ────────────────── */}
-        {!isMinimized && (
+        {/* Body — oculto si minimizado */}
+        {!minimized && (
           <>
             <TerminalOutput lines={lines} />
             <TerminalInput
               value={state.input}
+              prompt={prompt}
               onChange={v => setState(s => ({ ...s, input: v }))}
               onExecute={execute}
               onNavigate={navigateHistory}
+              onTab={tabComplete}
             />
           </>
         )}
       </div>
     </>,
     document.body
-  )
-}
-
-/* ── Subcomponente interno — traffic light button ───────── */
-interface TrafficLightProps {
-  color:   string
-  label:   string
-  onClick: () => void
-}
-
-function TrafficLight({ color, label, onClick }: TrafficLightProps) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      style={{
-        width:        '12px',
-        height:       '12px',
-        borderRadius: '50%',
-        background:   color,
-        border:       'none',
-        cursor:       'pointer',
-        padding:      0,
-        flexShrink:   0,
-        transition:   'opacity 0.15s ease',
-      }}
-      onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
-      onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-    />
   )
 }
