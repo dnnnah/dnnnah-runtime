@@ -40,13 +40,19 @@ export interface TerminalState {
 
 // ─── VFS ─────────────────────────────────────────────────────────────────────
 
-export interface VFSNode {
-  type:     'dir' | 'file'
-  children?: Record<string, VFSNode>
-  content?: string[]
+export interface VFSFile {
+  kind:    'file'
+  content: TerminalLine[]
 }
+
+export interface VFSDir {
+  kind:     'dir'
+  children: Record<string, VFSNode>
+}
+
+export type VFSNode = VFSFile | VFSDir
 
 export interface VFSState {
   cwd:  string[]
-  root: VFSNode
+  root: VFSDir
 }
