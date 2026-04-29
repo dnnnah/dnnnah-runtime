@@ -22,17 +22,15 @@ export function useLenis() {
     gsap.ticker.add(onTick)
     gsap.ticker.lagSmoothing(0)
 
-    // Sincronización correcta — Lenis notifica a ScrollTrigger
     lenis.on('scroll', ({ scroll }: { scroll: number }) => {
       ScrollTrigger.update()
     })
 
-    // ScrollTrigger usa la posición real de Lenis
     ScrollTrigger.scrollerProxy(document.body, {
       scrollTop: () => lenis.scroll,
       getBoundingClientRect: () => ({
         top: 0, left: 0,
-        width: window.innerWidth,
+        width:  window.innerWidth,
         height: window.innerHeight,
       }),
     })

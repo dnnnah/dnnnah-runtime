@@ -2,39 +2,32 @@
 
 /**
  * Sidebar de contacto — status, email directo y links sociales.
+ * minWidth: 0 es crítico para que no desborde el grid en mobile.
  */
 
+const RUNTIME_STATUS = [
+  { key: 'Response time', val: '< 24h' },
+  { key: 'Timezone',      val: 'UTC-5 (LATAM)' },
+  { key: 'Open to',       val: 'Remote · Full-time · Contract' },
+]
+
 const SOCIAL_LINKS = [
-  {
-    icon:  'in',
-    label: 'LinkedIn',
-    sub:   'linkedin.com/in/dnnnah',
-    href:  'https://linkedin.com/in/dnnnah',
-  },
-  {
-    icon:  'gh',
-    label: 'GitHub',
-    sub:   'github.com/dnnnah',
-    href:  'https://github.com/dnnnah',
-  },
-  {
-    icon:  'cv',
-    label: 'CV / Resume',
-    sub:   'dnnnah_cv.pdf',
-    href:  '/dnnnah_cv.pdf',
-  },
+  { icon: 'in', label: 'LinkedIn',   sub: 'linkedin.com/in/dnnnah', href: 'https://linkedin.com/in/dnnnah' },
+  { icon: 'gh', label: 'GitHub',     sub: 'github.com/dnnnah',      href: 'https://github.com/dnnnah' },
+  { icon: 'cv', label: 'CV / Resume',sub: 'dnnnah_cv.pdf',          href: '/dnnnah_cv.pdf' },
 ]
 
 export function SocialLinks() {
   return (
     <aside style={{
-      display:       'flex',
-      flexDirection: 'column',
-      gap:           '0',
+      display:         'flex',
+      flexDirection:   'column',
       backgroundColor: 'var(--color-bg-surface)',
-      border:        '1px solid var(--color-border)',
-      borderRadius:  '8px',
-      overflow:      'hidden',
+      border:          '1px solid var(--color-border)',
+      borderRadius:    '8px',
+      overflow:        'hidden',
+      /* Evita que desborde su celda del grid cuando colapsa a 1 columna */
+      minWidth:        0,
     }}>
 
       {/* Runtime status */}
@@ -48,15 +41,12 @@ export function SocialLinks() {
           // runtime_status
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {[
-            { key: 'Response time', val: '< 24h' },
-            { key: 'Timezone',      val: 'UTC-5 (LATAM)' },
-            { key: 'Open to',       val: 'Remote · Full-time · Contract' },
-          ].map(item => (
+          {RUNTIME_STATUS.map(item => (
             <div key={item.key} className="font-mono" style={{
               display:  'flex',
               gap:      '8px',
               fontSize: 'clamp(9px, 1.8vw, 11px)',
+              flexWrap: 'wrap',
             }}>
               <span style={{ color: 'var(--color-text-muted)', flexShrink: 0 }}>
                 {item.key}:
@@ -87,6 +77,8 @@ export function SocialLinks() {
             color:          'var(--color-text-muted)',
             textDecoration: 'none',
             transition:     'color 0.2s ease',
+            /* Permite que el email se parta si no cabe */
+            wordBreak:      'break-all',
           }}
           onMouseEnter={e => e.currentTarget.style.color = 'var(--color-accent)'}
           onMouseLeave={e => e.currentTarget.style.color = 'var(--color-text-muted)'}
@@ -122,42 +114,49 @@ export function SocialLinks() {
                 backgroundColor: 'var(--color-bg-base)',
                 textDecoration:  'none',
                 transition:      'border-color 0.2s ease, background-color 0.2s ease',
+                /* Evita overflow del link dentro del aside */
+                minWidth:        0,
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.borderColor       = 'var(--color-accent)'
-                e.currentTarget.style.backgroundColor   = 'var(--color-bg-elevated)'
+                e.currentTarget.style.borderColor     = 'var(--color-accent)'
+                e.currentTarget.style.backgroundColor = 'var(--color-bg-elevated)'
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.borderColor       = 'var(--color-border)'
-                e.currentTarget.style.backgroundColor   = 'var(--color-bg-base)'
+                e.currentTarget.style.borderColor     = 'var(--color-border)'
+                e.currentTarget.style.backgroundColor = 'var(--color-bg-base)'
               }}
             >
               <span className="font-mono" style={{
-                color:     'var(--color-accent)',
-                minWidth:  '16px',
-                fontSize:  '11px',
+                color:      'var(--color-accent)',
+                minWidth:   '16px',
+                fontSize:   '11px',
                 fontWeight: 700,
+                flexShrink: 0,
               }}>
                 {link.icon}
               </span>
-              <div style={{ flex: 1 }}>
+
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <div className="font-mono" style={{
-                  fontSize: '11px',
-                  color:    'var(--color-text)',
+                  fontSize:     '11px',
+                  color:        'var(--color-text)',
+                  overflow:     'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace:   'nowrap',
                 }}>
                   {link.label}
                 </div>
                 <div className="font-mono" style={{
-                  fontSize: '9px',
-                  color:    'var(--color-text-muted)',
+                  fontSize:  '9px',
+                  color:     'var(--color-text-muted)',
+                  /* URL larga se parte antes de desbordar */
+                  wordBreak: 'break-all',
                 }}>
                   {link.sub}
                 </div>
               </div>
-              <span style={{
-                fontSize: '9px',
-                color:    'var(--color-text-muted)',
-              }}>
+
+              <span aria-hidden="true" style={{ fontSize: '9px', color: 'var(--color-text-muted)', flexShrink: 0 }}>
                 ↗
               </span>
             </a>

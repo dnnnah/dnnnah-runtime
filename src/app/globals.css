@@ -70,9 +70,11 @@ html {
   scroll-behavior: smooth;
   /* Evita que iOS redimensione el texto al rotar */
   -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
 }
 
 body {
+  margin:           0;
   background-color: var(--color-bg-base);
   color:            var(--color-text);
   font-family:      var(--font-jetbrains), "Fira Code", "Courier New", monospace;
@@ -505,4 +507,55 @@ body.panic { animation: panicFlash 2.5s ease-in-out forwards; }
 /* ── Small mobile ≤ 390px ─────────────────────────────── */
 @media (max-width: 390px) {
   .overview-cards { grid-template-columns: 1fr; }
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE CAROUSEL — carrusel de proyectos en mobile.
+   El contenedor no debe generar scroll horizontal.
+   ══════════════════════════════════════════════════════════ */
+
+.carousel-wrapper {
+  width:     100%;
+  max-width: 100vw;
+  overflow:  hidden;         /* Contiene cualquier desborde */
+  box-sizing: border-box;
+}
+
+.carousel-card {
+  width:      100%;
+  padding:    0 16px;
+  box-sizing: border-box;   /* padding incluido en el 100% */
+}
+
+/* --card-w heredado por ProjectCard dentro del carrusel */
+.carousel-card {
+  --card-w: 100%;
+}
+
+.carousel-controls {
+  display:        flex;
+  align-items:    center;
+  justify-content: space-between;
+  margin-top:     20px;
+  padding:        0 16px;
+  box-sizing:     border-box;
+  width:          100%;
+}
+
+.carousel-counter {
+  text-align:  center;
+  font-size:   10px;
+  color:       var(--color-text-muted);
+  margin-top:  12px;
+  letter-spacing: 0.08em;
+}
+
+/* ── Carrusel mobile: forzar card al ancho del contenedor ── */
+@media (max-width: 767px) {
+  .carousel-card article {
+    width:      100% !important;
+    max-width:  100% !important;
+    flex-shrink: 1 !important;
+  }
 }

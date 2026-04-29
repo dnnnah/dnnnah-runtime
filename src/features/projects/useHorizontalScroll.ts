@@ -23,7 +23,7 @@ export function useHorizontalScroll() {
         scrollTrigger: {
           trigger:             section,
           start:               'top top',
-          end: () => `+=${track.scrollWidth}`,
+          end:                 () => `+=${track.scrollWidth}`,
           pin:                 true,
           scrub:               1,
           invalidateOnRefresh: true,
@@ -31,14 +31,13 @@ export function useHorizontalScroll() {
       })
     })
 
-    // Recalcula en resize y orientación
     const onResize = () => ScrollTrigger.refresh()
-    window.addEventListener('resize', onResize)
+    window.addEventListener('resize',            onResize)
     window.addEventListener('orientationchange', onResize)
 
     return () => {
       ctx.revert()
-      window.removeEventListener('resize', onResize)
+      window.removeEventListener('resize',            onResize)
       window.removeEventListener('orientationchange', onResize)
     }
   }, [])

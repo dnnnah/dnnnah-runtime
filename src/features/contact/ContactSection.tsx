@@ -1,11 +1,15 @@
 'use client'
 
-import { ContactForm }  from './ContactForm'
-import { SocialLinks }  from './SocialLinks'
+import { ContactForm } from './ContactForm'
+import { SocialLinks } from './SocialLinks'
 
 /**
  * Sección std/output — formulario de contacto estilo terminal.
- * Narrativa sys/exit: última sección antes de cerrar el runtime.
+ *
+ * Layout: .contact-grid (globals.css)
+ * - Desktop: form | sidebar 260px
+ * - Tablet ≤ 1024px: 1 columna
+ * - Mobile ≤ 767px: 1 columna, gap reducido
  */
 
 const TERMINAL_LINES = [
@@ -27,12 +31,11 @@ export function ContactSection() {
       style={{
         backgroundColor: 'var(--color-bg-base)',
         minHeight:       '100vh',
-        paddingTop:      '56px',
+        paddingTop:      'var(--navbar-h)',
       }}
     >
-
       <div style={{
-        padding: 'clamp(32px, 5vw, 64px) clamp(24px, 5vw, 64px)',
+        padding:  'var(--page-y) var(--page-x)',
         maxWidth: '1100px',
         margin:   '0 auto',
       }}>
@@ -64,10 +67,15 @@ export function ContactSection() {
             alignItems:      'center',
             gap:             '8px',
           }}>
+            {/* Traffic lights */}
             <div style={{ display: 'flex', gap: '6px' }}>
-              <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#ff5555' }} />
-              <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#f1fa8c' }} />
-              <div style={{ width: '9px', height: '9px', borderRadius: '50%', background: '#50fa7b' }} />
+              {(['#ff5555', '#f1fa8c', '#50fa7b'] as const).map(color => (
+                <div
+                  key={color}
+                  aria-hidden="true"
+                  style={{ width: '9px', height: '9px', borderRadius: '50%', background: color }}
+                />
+              ))}
             </div>
             <span className="font-mono" style={{
               fontSize:      '10px',
@@ -82,33 +90,33 @@ export function ContactSection() {
           {/* Terminal body */}
           <div style={{
             backgroundColor: 'var(--color-bg-surface)',
-            padding:         'clamp(24px, 4vw, 40px)',
+            padding:         'clamp(20px, 4vw, 40px)',
           }}>
 
             {/* Terminal lines */}
             <div style={{ marginBottom: '32px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {TERMINAL_LINES.map((line, i) => (
                 <p key={i} className="font-mono" style={{
-                  fontSize:   'clamp(10px, 2vw, 12px)',
+                  fontSize:   'clamp(9px, 1.8vw, 12px)',
                   color:      line.color,
                   margin:     0,
                   lineHeight: 1.8,
+                  /* Evita overflow en pantallas muy chicas */
+                  overflowWrap: 'break-word',
                 }}>
                   {line.text}
                 </p>
               ))}
             </div>
 
-            {/* Grid — form + sidebar */}
-            <div
-              className="contact-grid"
-              style={{
-                display:             'grid',
-                gridTemplateColumns: 'minmax(0, 1fr) 260px',
-                gap:                 '48px',
-                alignItems:          'start',
-              }}
-            >
+            {/*
+              .contact-grid — definido en globals.css:
+              - Desktop:        form | sidebar 260px
+              - Tablet ≤ 1024px: 1 columna, gap 32px
+              - Mobile ≤ 767px:  1 columna, gap 24px
+            */}
+            <div className="contact-grid">
+
               {/* Form */}
               <div>
                 <p className="font-mono" style={{
@@ -135,7 +143,7 @@ export function ContactSection() {
           paddingTop:     '24px',
           display:        'flex',
           justifyContent: 'center',
-          gap:            'clamp(16px, 4vw, 48px)',
+          gap:            'clamp(12px, 4vw, 48px)',
           flexWrap:       'wrap',
         }}>
           {FOOTER_LINKS.map(link => (

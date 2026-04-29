@@ -1,8 +1,8 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import type { Project } from './types'
 import { StatusBadge }  from './StatusBadge'
-import { useRouter }    from 'next/navigation'
 
 const TAG_STYLES: Record<string, string> = {
   go:         'tag-go',
@@ -23,7 +23,7 @@ interface ProjectCardProps {
   project: Project
 }
 
-export function ProjectCard({ project}: ProjectCardProps) {
+export function ProjectCard({ project }: ProjectCardProps) {
   const router = useRouter()
 
   return (
@@ -31,7 +31,11 @@ export function ProjectCard({ project}: ProjectCardProps) {
       onClick={() => router.push(`/projects/${project.id}`)}
       aria-label={project.title}
       style={{
-        width: 'clamp(320px, 78vw, 820px)',
+        /*
+          --card-w la define HorizontalTrack en el contenedor padre.
+          Un solo punto de control para el ancho de todas las cards.
+        */
+        width:           'var(--card-w)',
         flexShrink:      0,
         cursor:          'pointer',
         backgroundColor: 'var(--color-bg-surface)',
@@ -49,37 +53,36 @@ export function ProjectCard({ project}: ProjectCardProps) {
         e.currentTarget.style.transform   = 'translateY(0)'
       }}
     >
-      {/* Screenshot — más alto */}
-      <div
-        style={{
-          position:        'relative',
-          height:          '280px',
-          overflow:        'hidden',
-          backgroundColor: 'var(--color-bg-elevated)',
-        }}
-      >
+      {/* Screenshot */}
+      <div style={{
+        position:        'relative',
+        /*
+          clamp adaptivo: 200px en mobile, 280px en desktop.
+          Evita que la imagen se coma toda la pantalla en móviles pequeños.
+        */
+        height:          'clamp(180px, 32vw, 280px)',
+        overflow:        'hidden',
+        backgroundColor: 'var(--color-bg-elevated)',
+      }}>
         {project.screenshot.startsWith('/projects') ? (
-          <div
-            style={{
-              width:          '100%',
-              height:         '100%',
-              display:        'flex',
-              flexDirection:  'column',
-              alignItems:     'center',
-              justifyContent: 'center',
-              gap:            '8px',
-            }}
-          >
-            <span
-              className="font-mono"
-              style={{ fontSize: '11px', color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}
-            >
+          /* Placeholder cuando no hay screenshot */
+          <div style={{
+            width:          '100%',
+            height:         '100%',
+            display:        'flex',
+            flexDirection:  'column',
+            alignItems:     'center',
+            justifyContent: 'center',
+            gap:            '8px',
+          }}>
+            <span className="font-mono" style={{
+              fontSize:      '11px',
+              color:         'var(--color-text-muted)',
+              letterSpacing: '0.08em',
+            }}>
               {project.execId}
             </span>
-            <span
-              className="font-mono"
-              style={{ fontSize: '9px', color: 'var(--color-disabled)' }}
-            >
+            <span className="font-mono" style={{ fontSize: '9px', color: 'var(--color-text-disabled)' }}>
               // screenshot pending
             </span>
           </div>
@@ -93,80 +96,76 @@ export function ProjectCard({ project}: ProjectCardProps) {
 
         {/* Hover overlay */}
         <div className="card-overlay">
-          <p
-            className="font-mono"
-            style={{
-              fontSize:      '11px',
-              color:         'var(--color-text)',
-              textAlign:     'center',
-              padding:       '0 24px',
-              letterSpacing: '0.05em',
-              lineHeight:    1.8,
-            }}
-          >
+          <p className="font-mono" style={{
+            fontSize:      '11px',
+            color:         'var(--color-text)',
+            textAlign:     'center',
+            padding:       '0 24px',
+            letterSpacing: '0.05em',
+            lineHeight:    1.8,
+          }}>
             {project.stack.join(' · ')}
           </p>
         </div>
 
-        {/* ExecId label — top left */}
-        <div
-          style={{
-            position:        'absolute',
-            top:             '12px',
-            left:            '12px',
-            backgroundColor: 'var(--color-bg-elevated)',
-            backdropFilter:  'blur(4px)',
-            padding:         '3px 8px',
-            borderRadius:    '3px',
-            border:          '1px solid var(--color-border)',
-          }}
-        >
-          <span
-            className="font-mono"
-            style={{ fontSize: '9px', color: 'var(--color-text-muted)', letterSpacing: '0.08em' }}
-          >
+        {/* ExecId badge */}
+        <div style={{
+          position:        'absolute',
+          top:             '12px',
+          left:            '12px',
+          backgroundColor: 'var(--color-bg-elevated)',
+          backdropFilter:  'blur(4px)',
+          padding:         '3px 8px',
+          borderRadius:    '3px',
+          border:          '1px solid var(--color-border)',
+        }}>
+          <span className="font-mono" style={{
+            fontSize:      '9px',
+            color:         'var(--color-text-muted)',
+            letterSpacing: '0.08em',
+          }}>
             {project.execId}
           </span>
         </div>
       </div>
 
       {/* Body */}
-      <div
-        style={{
-          padding:       '16px',
-          display:       'flex',
-          flexDirection: 'column',
-          gap:           '10px',
-        }}
-      >
+      <div style={{
+        padding:       '16px',
+        display:       'flex',
+        flexDirection: 'column',
+        gap:           '10px',
+        /* minWidth: 0 — permite que el texto largo se trunque */
+        minWidth:      0,
+      }}>
         {/* Header */}
-        <div
-          style={{
-            display:        'flex',
-            justifyContent: 'space-between',
-            alignItems:     'flex-start',
-            gap:            '12px',
-          }}
-        >
-          <span
-            className="font-mono"
-            style={{
-              fontSize:   'clamp(12px, 2vw, 14px)',
-              fontWeight: 700,
-              color:      'var(--color-text)',
-              lineHeight: 1.3,
-            }}
-          >
+        <div style={{
+          display:        'flex',
+          justifyContent: 'space-between',
+          alignItems:     'flex-start',
+          gap:            '12px',
+        }}>
+          <span className="font-mono" style={{
+            fontSize:     'clamp(12px, 2vw, 14px)',
+            fontWeight:   700,
+            color:        'var(--color-text)',
+            lineHeight:   1.3,
+            overflow:     'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace:   'nowrap',
+            minWidth:     0,
+          }}>
             {project.title}
           </span>
           <StatusBadge status={project.status} />
         </div>
 
-        {/* Build time */}
-        <p
-          className="font-mono"
-          style={{ fontSize: '10px', color: 'var(--color-text-muted)', margin: 0 }}
-        >
+        {/* Meta */}
+        <p className="font-mono" style={{
+          fontSize: '10px',
+          color:    'var(--color-text-muted)',
+          margin:   0,
+        }}>
           build_time: {project.buildTime} · {project.stack[0]}
         </p>
 
@@ -183,23 +182,19 @@ export function ProjectCard({ project}: ProjectCardProps) {
         </div>
 
         {/* Footer */}
-        <div
-          style={{
-            display:        'flex',
-            justifyContent: 'space-between',
-            alignItems:     'center',
-            paddingTop:     '10px',
-            borderTop:      '1px solid var(--color-border)',
-          }}
-        >
-          <span
-            className="font-mono"
-            style={{ fontSize: '10px', color: 'var(--color-accent)' }}
-          >
+        <div style={{
+          display:        'flex',
+          justifyContent: 'space-between',
+          alignItems:     'center',
+          paddingTop:     '10px',
+          borderTop:      '1px solid var(--color-border)',
+          gap:            '8px',
+        }}>
+          <span className="font-mono" style={{ fontSize: '10px', color: 'var(--color-accent)', flexShrink: 0 }}>
             {'>'} inspect_project
           </span>
 
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
             {project.demoUrl && (
               <a
                 href={project.demoUrl}
@@ -215,13 +210,13 @@ export function ProjectCard({ project}: ProjectCardProps) {
                   padding:        '2px 8px',
                   borderRadius:   '3px',
                   transition:     'background 0.2s ease',
+                  whiteSpace:     'nowrap',
+                  minHeight:      '24px',
+                  display:        'inline-flex',
+                  alignItems:     'center',
                 }}
-                onMouseEnter={e =>
-                  (e.currentTarget.style.background = 'rgba(139,233,253,0.08)')
-                }
-                onMouseLeave={e =>
-                  (e.currentTarget.style.background = 'transparent')
-                }
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(139,233,253,0.08)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
                 ↗ demo
               </a>
@@ -240,13 +235,13 @@ export function ProjectCard({ project}: ProjectCardProps) {
                 padding:        '2px 8px',
                 borderRadius:   '3px',
                 transition:     'color 0.2s ease',
+                whiteSpace:     'nowrap',
+                minHeight:      '24px',
+                display:        'inline-flex',
+                alignItems:     'center',
               }}
-              onMouseEnter={e =>
-                (e.currentTarget.style.color = 'var(--color-text)')
-              }
-              onMouseLeave={e =>
-                (e.currentTarget.style.color = 'var(--color-text-muted)')
-              }
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-text)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--color-text-muted)')}
             >
               ↗ github
             </a>

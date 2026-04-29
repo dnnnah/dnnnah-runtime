@@ -1,10 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Project } from '@/features/projects/types'
-import { StatusBadge }  from '@/features/projects/StatusBadge'
+import type { Project }  from '@/features/projects/types'
+import { StatusBadge }   from '@/features/projects/StatusBadge'
 
-const NAV_SECTIONS = [
+type NavGroup = 'overview' | 'technical' | 'engineering'
+
+interface NavSection {
+  id:    string
+  label: string
+  group: NavGroup
+}
+
+const NAV_SECTIONS: NavSection[] = [
   { id: 'overview',     label: 'overview',        group: 'overview' },
   { id: 'screenshots',  label: 'screenshots',     group: 'overview' },
   { id: 'architecture', label: 'architecture',    group: 'technical' },
@@ -16,6 +24,8 @@ const NAV_SECTIONS = [
   { id: 'results',      label: 'results',         group: 'engineering' },
   { id: 'lessons',      label: 'lessons',         group: 'engineering' },
 ]
+
+const GROUPS: NavGroup[] = ['overview', 'technical', 'engineering']
 
 const TAG_STYLES: Record<string, string> = {
   go:         'tag-go',
@@ -32,60 +42,59 @@ const TAG_STYLES: Record<string, string> = {
   cobra:      'tag-go',
 }
 
+/** Devuelve el id de la sección activa según la posición del scroll */
+function getActiveSection(sections: { id: string; el: HTMLElement }[]): string {
+  const scrollY  = window.scrollY
+  const windowH  = window.innerHeight
+  const docH     = document.documentElement.scrollHeight
+  const atBottom = scrollY + windowH >= docH - 40
+
+  if (atBottom) return sections[sections.length - 1].id
+
+  let current = sections[0].id
+  for (const { id, el } of sections) {
+    if (el.getBoundingClientRect().top <= windowH * 0.3) current = id
+  }
+  return current
+}
+
 export function SidebarNav({ project }: { project: Project }) {
-  const [active, setActive] = useState('overview')
+  const [active, setActive] = useState<string>('overview')
 
   useEffect(() => {
-    // Scroll spy basado en posición — más robusto que IntersectionObserver
-    // para la última sección
+    /*
+      reduce en lugar de map+filter — evita el type guard.
+      Solo incluye secciones cuyo elemento existe en el DOM.
+    */
+    const sections = NAV_SECTIONS.reduce<{ id: string; el: HTMLElement }[]>((acc, s) => {
+      const el = document.getElementById(s.id)
+      if (el) acc.push({ id: s.id, el })
+      return acc
+    }, [])
+
     function onScroll() {
-      const sections = NAV_SECTIONS.map(s => ({
-        id: s.id,
-        el: document.getElementById(s.id),
-      })).filter(s => s.el !== null)
-
-      const scrollY     = window.scrollY
-      const windowH     = window.innerHeight
-      const docH        = document.documentElement.scrollHeight
-      const atBottom    = scrollY + windowH >= docH - 40
-
-      // Si está al fondo, activa la última sección
-      if (atBottom) {
-        setActive(sections[sections.length - 1].id)
-        return
-      }
-
-      // Busca la sección más cercana al top del viewport
-      let current = sections[0].id
-      for (const { id, el } of sections) {
-        if (!el) continue
-        const rect = el.getBoundingClientRect()
-        if (rect.top <= windowH * 0.3) {
-          current = id
-        }
-      }
-      setActive(current)
+      setActive(getActiveSection(sections))
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll() // inicial
-
+    onScroll() // estado inicial
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-
-  const groups = ['overview', 'technical', 'engineering'] as const
 
   return (
     <aside
       className="showcase-sidebar"
       style={{
         position:        'sticky',
-        top:             '112px',
-        height:          'calc(100vh - 112px)',
+        /*
+          top = navbar height (56px) + sticky header del detalle (56px).
+          Usar el token en lugar del magic number 112px.
+        */
+        top:             'calc(var(--navbar-h) * 2)',
+        height:          'calc(100dvh - calc(var(--navbar-h) * 2))',
         overflowY:       'auto',
         backgroundColor: 'var(--color-bg-surface)',
         borderRight:     '1px solid var(--color-border)',
-        flexDirection:   'column',
       }}
     >
       {/* Project identity */}
@@ -103,15 +112,19 @@ export function SidebarNav({ project }: { project: Project }) {
           fontWeight:   700,
           color:        'var(--color-text)',
           marginBottom: '8px',
+          /* Título largo se trunca sin desbordar */
+          overflow:     'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace:   'nowrap',
         }}>
           {project.title}
         </div>
         <StatusBadge status={project.status} />
       </div>
 
-      {/* Nav sections */}
+      {/* Navegación por secciones */}
       <nav style={{ flex: 1, padding: '8px 0' }}>
-        {groups.map(group => (
+        {GROUPS.map(group => (
           <div key={group}>
             <div className="font-mono" style={{
               fontSize:      '8px',
@@ -122,41 +135,46 @@ export function SidebarNav({ project }: { project: Project }) {
             }}>
               {group}
             </div>
-            {NAV_SECTIONS.filter(s => s.group === group).map(s => (
-              <a
-                key={s.id}
-                href={`#${s.id}`}
-                className="font-mono"
-                style={{
-                  display:        'flex',
-                  alignItems:     'center',
-                  gap:            '8px',
-                  padding:        '6px 16px',
-                  fontSize:       '10px',
-                  color:          active === s.id ? 'var(--color-accent)' : 'var(--color-text-muted)',
-                  background:     active === s.id ? 'rgba(189,147,249,0.06)' : 'transparent',
-                  borderLeft:     `2px solid ${active === s.id ? 'var(--color-accent)' : 'transparent'}`,
-                  textDecoration: 'none',
-                  transition:     'all 0.15s ease',
-                }}
-                onMouseEnter={e => {
-                  if (active !== s.id) e.currentTarget.style.color = 'var(--color-accent)'
-                }}
-                onMouseLeave={e => {
-                  if (active !== s.id) e.currentTarget.style.color = 'var(--color-text-muted)'
-                }}
-              >
-                <div style={{
-                  width:        '5px',
-                  height:       '5px',
-                  borderRadius: '50%',
-                  background:   active === s.id ? 'var(--color-accent)' : 'var(--color-text-disabled)',
-                  flexShrink:   0,
-                  transition:   'background 0.15s ease',
-                }} />
-                {s.label}
-              </a>
-            ))}
+
+            {NAV_SECTIONS.filter(s => s.group === group).map(s => {
+              const isActive = active === s.id
+              return (
+                <a
+                  key={s.id}
+                  href={`#${s.id}`}
+                  className="font-mono"
+                  style={{
+                    display:        'flex',
+                    alignItems:     'center',
+                    gap:            '8px',
+                    padding:        '6px 16px',
+                    fontSize:       '10px',
+                    color:          isActive ? 'var(--color-accent)' : 'var(--color-text-muted)',
+                    background:     isActive ? 'rgba(189,147,249,0.06)' : 'transparent',
+                    borderLeft:     `2px solid ${isActive ? 'var(--color-accent)' : 'transparent'}`,
+                    textDecoration: 'none',
+                    transition:     'all 0.15s ease',
+                    whiteSpace:     'nowrap',
+                  }}
+                  onMouseEnter={e => {
+                    if (!isActive) e.currentTarget.style.color = 'var(--color-accent)'
+                  }}
+                  onMouseLeave={e => {
+                    if (!isActive) e.currentTarget.style.color = 'var(--color-text-muted)'
+                  }}
+                >
+                  <div style={{
+                    width:        '5px',
+                    height:       '5px',
+                    borderRadius: '50%',
+                    background:   isActive ? 'var(--color-accent)' : 'var(--color-text-disabled)',
+                    flexShrink:   0,
+                    transition:   'background 0.15s ease',
+                  }} />
+                  {s.label}
+                </a>
+              )
+            })}
           </div>
         ))}
       </nav>

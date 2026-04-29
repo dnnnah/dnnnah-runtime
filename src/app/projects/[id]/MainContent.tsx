@@ -1,4 +1,9 @@
-import type { Project, StackItem, FlowStep, CodePattern, Challenge, ScaleDecision, Result, Lesson } from '@/features/projects/types'
+import type {
+  Project, StackItem, FlowStep, CodePattern,
+  Challenge, ScaleDecision, Result, Lesson,
+} from '@/features/projects/types'
+
+/* ── Constantes ─────────────────────────────────────────── */
 
 const DOT_COLORS: Record<string, string> = {
   core:     'var(--color-accent)',
@@ -18,13 +23,22 @@ const NAV_SECTIONS = [
   { id: 'scalability',  label: 'scalability' },
   { id: 'results',      label: 'results' },
   { id: 'lessons',      label: 'lessons' },
+] as const
+
+const OVERVIEW_META = (project: Project) => [
+  { label: 'TYPE',     value: project.type },
+  { label: 'DURATION', value: project.duration },
+  { label: 'ROLE',     value: project.role },
+  { label: 'STATUS',   value: project.status.toUpperCase() },
 ]
+
+/* ── Componente principal ───────────────────────────────── */
 
 export function MainContent({ project }: { project: Project }) {
   return (
-    <main>
+    <main style={{ minWidth: 0 }}>
 
-      {/* Mobile nav pills — sin display inline, lo controla CSS */}
+      {/* Mobile nav pills */}
       <div className="mobile-section-nav">
         {NAV_SECTIONS.map(s => (
           <a
@@ -49,27 +63,20 @@ export function MainContent({ project }: { project: Project }) {
 
       {/* 1. OVERVIEW */}
       <Section id="overview" label="// overview">
-        {/* overview-cards: 4 cols desktop, 2 cols mobile — controlado por CSS */}
-        <div
-          className="overview-cards"
-          style={{
-            display:             'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap:                 '10px',
-            marginBottom:        '24px',
-          }}
-        >
-          {[
-            { label: 'TYPE',     value: project.type },
-            { label: 'DURATION', value: project.duration },
-            { label: 'ROLE',     value: project.role },
-            { label: 'STATUS',   value: project.status.toUpperCase() },
-          ].map(card => (
+        {/*
+          .overview-cards — globals.css:
+          - Desktop: 4 columnas
+          - Mobile ≤ 767px: 2 columnas
+          - Mobile ≤ 390px: 1 columna
+        */}
+        <div className="overview-cards">
+          {OVERVIEW_META(project).map(card => (
             <div key={card.label} style={{
               background:   'var(--color-bg-elevated)',
               border:       '1px solid var(--color-border)',
               borderRadius: '6px',
               padding:      '10px 12px',
+              minWidth:     0,
             }}>
               <div className="font-mono" style={{
                 fontSize:      '8px',
@@ -80,9 +87,12 @@ export function MainContent({ project }: { project: Project }) {
                 {card.label}
               </div>
               <div className="font-mono" style={{
-                fontSize:   '11px',
-                fontWeight: 700,
-                color:      'var(--color-text)',
+                fontSize:     '11px',
+                fontWeight:   700,
+                color:        'var(--color-text)',
+                overflow:     'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace:   'nowrap',
               }}>
                 {card.value}
               </div>
@@ -91,23 +101,12 @@ export function MainContent({ project }: { project: Project }) {
         </div>
 
         <SubSection label="// context">
-          <p className="font-mono" style={{
-            fontSize:   'clamp(11px, 1.8vw, 13px)',
-            color:      'var(--color-text)',
-            lineHeight: 1.9,
-            margin:     0,
-          }}>
+          <p className="font-mono" style={{ fontSize: 'clamp(11px, 1.8vw, 13px)', color: 'var(--color-text)', lineHeight: 1.9, margin: 0 }}>
             {project.context}
           </p>
         </SubSection>
-
         <SubSection label="// problem">
-          <p className="font-mono" style={{
-            fontSize:   'clamp(11px, 1.8vw, 13px)',
-            color:      'var(--color-text)',
-            lineHeight: 1.9,
-            margin:     0,
-          }}>
+          <p className="font-mono" style={{ fontSize: 'clamp(11px, 1.8vw, 13px)', color: 'var(--color-text)', lineHeight: 1.9, margin: 0 }}>
             {project.problem}
           </p>
         </SubSection>
@@ -127,22 +126,23 @@ export function MainContent({ project }: { project: Project }) {
           border:       '1px solid var(--color-border)',
           borderRadius: '6px',
           padding:      '16px',
-          fontSize:     'clamp(9px, 1.4vw, 11px)',
+          fontSize:     'clamp(8px, 1.4vw, 11px)',
           color:        'var(--color-accent-cyan)',
           lineHeight:   1.8,
+          /*
+            overflow-x: auto — el diagrama ASCII no rompe el layout en mobile.
+            max-width: 100% — nunca desborda su contenedor.
+          */
           overflowX:    'auto',
+          maxWidth:     '100%',
           whiteSpace:   'pre',
           marginBottom: '16px',
           fontFamily:   'inherit',
+          WebkitOverflowScrolling: 'touch',
         }}>
           {project.architectureDiagram}
         </pre>
-        <p className="font-mono" style={{
-          fontSize:   'clamp(10px, 1.6vw, 12px)',
-          color:      'var(--color-text-muted)',
-          lineHeight: 1.9,
-          margin:     0,
-        }}>
+        <p className="font-mono" style={{ fontSize: 'clamp(10px, 1.6vw, 12px)', color: 'var(--color-text-muted)', lineHeight: 1.9, margin: 0 }}>
           {project.architecture}
         </p>
       </Section>
@@ -164,13 +164,7 @@ export function MainContent({ project }: { project: Project }) {
               </span>
               <p
                 className="font-mono"
-                style={{
-                  fontSize:   'clamp(10px, 1.6vw, 12px)',
-                  color:      'var(--color-text-muted)',
-                  lineHeight: 1.8,
-                  flex:       1,
-                  margin:     0,
-                }}
+                style={{ fontSize: 'clamp(10px, 1.6vw, 12px)', color: 'var(--color-text-muted)', lineHeight: 1.8, flex: 1, margin: 0, minWidth: 0 }}
                 dangerouslySetInnerHTML={{
                   __html: step.content.replace(
                     /`([^`]+)`/g,
@@ -183,7 +177,7 @@ export function MainContent({ project }: { project: Project }) {
         </div>
       </Section>
 
-      {/* 5. STACK DECISIONS */}
+      {/* 5. STACK */}
       <Section id="stack" label="// stack_decisions">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {project.stackItems.map((item: StackItem) => (
@@ -194,16 +188,17 @@ export function MainContent({ project }: { project: Project }) {
               background:   'var(--color-bg-elevated)',
               border:       '1px solid var(--color-border)',
               borderRadius: '6px',
+              minWidth:     0,
             }}>
               <div style={{ paddingTop: '3px', flexShrink: 0 }}>
                 <div style={{
                   width:           '8px',
                   height:          '8px',
                   borderRadius:    '50%',
-                  backgroundColor: DOT_COLORS[item.category],
+                  backgroundColor: DOT_COLORS[item.category] ?? 'var(--color-accent)',
                 }} />
               </div>
-              <div>
+              <div style={{ minWidth: 0 }}>
                 <div className="font-mono" style={{
                   fontSize:     '12px',
                   fontWeight:   700,
@@ -219,19 +214,15 @@ export function MainContent({ project }: { project: Project }) {
                     fontSize:     '8px',
                     padding:      '1px 6px',
                     borderRadius: '3px',
-                    background:   `${DOT_COLORS[item.category]}18`,
-                    color:        DOT_COLORS[item.category],
-                    border:       `1px solid ${DOT_COLORS[item.category]}40`,
+                    background:   `${DOT_COLORS[item.category] ?? 'var(--color-accent)'}18`,
+                    color:        DOT_COLORS[item.category] ?? 'var(--color-accent)',
+                    border:       `1px solid ${DOT_COLORS[item.category] ?? 'var(--color-accent)'}40`,
+                    flexShrink:   0,
                   }}>
                     {item.category}
                   </span>
                 </div>
-                <p className="font-mono" style={{
-                  fontSize:   'clamp(10px, 1.6vw, 12px)',
-                  color:      'var(--color-text-muted)',
-                  lineHeight: 1.8,
-                  margin:     0,
-                }}>
+                <p className="font-mono" style={{ fontSize: 'clamp(10px, 1.6vw, 12px)', color: 'var(--color-text-muted)', lineHeight: 1.8, margin: 0 }}>
                   {item.reason}
                 </p>
               </div>
@@ -240,7 +231,7 @@ export function MainContent({ project }: { project: Project }) {
         </div>
       </Section>
 
-      {/* 6. CODE PATTERNS */}
+      {/* 6. PATTERNS */}
       <Section id="patterns" label="// code_patterns">
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {project.codePatterns.map((p: CodePattern) => (
@@ -252,6 +243,7 @@ export function MainContent({ project }: { project: Project }) {
               border:       '1px solid var(--color-border)',
               borderRadius: '6px',
               flexWrap:     'wrap',
+              minWidth:     0,
             }}>
               <div className="font-mono" style={{
                 fontSize:   '10px',
@@ -262,13 +254,7 @@ export function MainContent({ project }: { project: Project }) {
               }}>
                 {p.name}
               </div>
-              <p className="font-mono" style={{
-                fontSize:   'clamp(10px, 1.6vw, 11px)',
-                color:      'var(--color-text-muted)',
-                lineHeight: 1.7,
-                flex:       1,
-                margin:     0,
-              }}>
+              <p className="font-mono" style={{ fontSize: 'clamp(10px, 1.6vw, 11px)', color: 'var(--color-text-muted)', lineHeight: 1.7, flex: 1, margin: 0, minWidth: 0 }}>
                 {p.desc}
               </p>
             </div>
@@ -286,36 +272,19 @@ export function MainContent({ project }: { project: Project }) {
               borderLeft:   '2px solid var(--color-accent-2)',
               borderRadius: '4px',
               padding:      '14px 16px',
+              minWidth:     0,
             }}>
-              <div className="font-mono" style={{
-                fontSize:     '11px',
-                fontWeight:   700,
-                color:        'var(--color-text)',
-                marginBottom: '8px',
-              }}>
+              <div className="font-mono" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-text)', marginBottom: '8px' }}>
                 {c.title}
               </div>
-              <p className="font-mono" style={{
-                fontSize:     'clamp(10px, 1.6vw, 12px)',
-                color:        'var(--color-text-muted)',
-                lineHeight:   1.8,
-                marginBottom: '10px',
-              }}>
+              <p className="font-mono" style={{ fontSize: 'clamp(10px, 1.6vw, 12px)', color: 'var(--color-text-muted)', lineHeight: 1.8, marginBottom: '10px' }}>
                 {c.problem}
               </p>
               <div style={{ paddingTop: '10px', borderTop: '1px solid var(--color-border)' }}>
-                <span className="font-mono" style={{
-                  fontSize:    '9px',
-                  color:       'var(--color-accent-cyan)',
-                  marginRight: '8px',
-                }}>
+                <span className="font-mono" style={{ fontSize: '9px', color: 'var(--color-accent-cyan)', marginRight: '8px' }}>
                   {'→ solution'}
                 </span>
-                <span className="font-mono" style={{
-                  fontSize:   'clamp(10px, 1.6vw, 12px)',
-                  color:      'var(--color-text-muted)',
-                  lineHeight: 1.8,
-                }}>
+                <span className="font-mono" style={{ fontSize: 'clamp(10px, 1.6vw, 12px)', color: 'var(--color-text-muted)', lineHeight: 1.8 }}>
                   {c.solution}
                 </span>
               </div>
@@ -333,21 +302,12 @@ export function MainContent({ project }: { project: Project }) {
               background:   'var(--color-bg-elevated)',
               border:       '1px solid var(--color-border)',
               borderRadius: '6px',
+              minWidth:     0,
             }}>
-              <div className="font-mono" style={{
-                fontSize:     '11px',
-                fontWeight:   700,
-                color:        'var(--color-text)',
-                marginBottom: '6px',
-              }}>
+              <div className="font-mono" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-text)', marginBottom: '6px' }}>
                 {s.title}
               </div>
-              <p className="font-mono" style={{
-                fontSize:   'clamp(10px, 1.6vw, 12px)',
-                color:      'var(--color-text-muted)',
-                lineHeight: 1.7,
-                margin:     0,
-              }}>
+              <p className="font-mono" style={{ fontSize: 'clamp(10px, 1.6vw, 12px)', color: 'var(--color-text-muted)', lineHeight: 1.7, margin: 0 }}>
                 {s.desc}
               </p>
             </div>
@@ -364,21 +324,12 @@ export function MainContent({ project }: { project: Project }) {
               border:       '1px solid rgba(80,250,123,0.2)',
               borderRadius: '6px',
               padding:      '12px 16px',
+              minWidth:     0,
             }}>
-              <div className="font-mono" style={{
-                fontSize:     '11px',
-                fontWeight:   700,
-                color:        'var(--color-status-live)',
-                marginBottom: '6px',
-              }}>
+              <div className="font-mono" style={{ fontSize: '11px', fontWeight: 700, color: 'var(--color-status-live)', marginBottom: '6px' }}>
                 {r.title}
               </div>
-              <p className="font-mono" style={{
-                fontSize:   'clamp(10px, 1.6vw, 12px)',
-                color:      'var(--color-text-muted)',
-                lineHeight: 1.7,
-                margin:     0,
-              }}>
+              <p className="font-mono" style={{ fontSize: 'clamp(10px, 1.6vw, 12px)', color: 'var(--color-text-muted)', lineHeight: 1.7, margin: 0 }}>
                 {r.desc}
               </p>
             </div>
@@ -398,6 +349,7 @@ export function MainContent({ project }: { project: Project }) {
               fontSize:     'clamp(10px, 1.6vw, 12px)',
               color:        'var(--color-text-muted)',
               lineHeight:   1.8,
+              minWidth:     0,
             }}>
               {l.text}
             </div>
@@ -409,28 +361,17 @@ export function MainContent({ project }: { project: Project }) {
   )
 }
 
+/* ── Subcomponentes internos ────────────────────────────── */
+
 function Section({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
   return (
     <div
       id={id}
       className="showcase-section"
-      style={{
-        padding:      'clamp(24px, 4vw, 40px)',
-        borderBottom: '1px solid var(--color-border)',
-      }}
+      style={{ padding: 'clamp(20px, 4vw, 40px)', borderBottom: '1px solid var(--color-border)' }}
     >
-      <div style={{
-        display:      'flex',
-        alignItems:   'center',
-        gap:          '10px',
-        marginBottom: '20px',
-      }}>
-        <span className="font-mono" style={{
-          fontSize:      '9px',
-          color:         'var(--color-text-muted)',
-          letterSpacing: '0.14em',
-          whiteSpace:    'nowrap',
-        }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+        <span className="font-mono" style={{ fontSize: '9px', color: 'var(--color-text-muted)', letterSpacing: '0.14em', whiteSpace: 'nowrap' }}>
           {label}
         </span>
         <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
@@ -459,23 +400,23 @@ function SubSection({ label, children }: { label: string; children: React.ReactN
 }
 
 function ScreenshotGallery({ screenshots, title }: { screenshots: string[]; title: string }) {
+  const imgStyle: React.CSSProperties = {
+    width:        '100%',
+    borderRadius: '6px',
+    border:       '1px solid var(--color-border)',
+    objectFit:    'cover',
+    display:      'block',
+  }
+
   if (screenshots.length === 1) {
-    return (
-      <img
-        src={screenshots[0]}
-        alt={title}
-        style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--color-border)', objectFit: 'cover' }}
-      />
-    )
+    return <img src={screenshots[0]} alt={title} style={imgStyle} />
   }
 
   if (screenshots.length === 2) {
     return (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
         {screenshots.map((s, i) => (
-          <img key={i} src={s} alt={`${title} ${i + 1}`}
-            style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--color-border)', objectFit: 'cover' }}
-          />
+          <img key={i} src={s} alt={`${title} ${i + 1}`} style={imgStyle} />
         ))}
       </div>
     )
@@ -483,18 +424,14 @@ function ScreenshotGallery({ screenshots, title }: { screenshots: string[]; titl
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <img src={screenshots[0]} alt={`${title} 1`}
-        style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--color-border)', objectFit: 'cover' }}
-      />
+      <img src={screenshots[0]} alt={`${title} 1`} style={imgStyle} />
       <div style={{
-        display:             'grid',
-        gridTemplateColumns: `repeat(${Math.min(screenshots.length - 1, 3)}, 1fr)`,
-        gap:                 '8px',
+        display:               'grid',
+        gridTemplateColumns:   `repeat(${Math.min(screenshots.length - 1, 3)}, 1fr)`,
+        gap:                   '8px',
       }}>
         {screenshots.slice(1).map((s, i) => (
-          <img key={i} src={s} alt={`${title} ${i + 2}`}
-            style={{ width: '100%', borderRadius: '6px', border: '1px solid var(--color-border)', objectFit: 'cover' }}
-          />
+          <img key={i} src={s} alt={`${title} ${i + 2}`} style={imgStyle} />
         ))}
       </div>
     </div>

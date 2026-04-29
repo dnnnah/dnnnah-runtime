@@ -62,6 +62,8 @@ export function NavBar() {
           top:                  0,
           left:                 0,
           right:                0,
+          width:                '100%',
+          boxSizing:            'border-box',
           zIndex:               1000,
           display:              'flex',
           alignItems:           'center',
