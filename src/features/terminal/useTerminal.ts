@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { COMMANDS, createTopLines } from './commands'
 import { EASTER_EGGS }              from './easterEggs'
+import { revealEmail }              from '@/shared/lib/email'
 import {
   VFS_ROOT,
   cwdPrompt,
@@ -15,19 +16,14 @@ import type { TerminalLine, TerminalState, VFSState } from './types'
 
 // ─── Secuencia SSH intro ──────────────────────────────────────────────────────
 
-/**
- * Genera las líneas de bienvenida SSH con la fecha real del sistema.
- * Se llama una sola vez, en la primera apertura.
- */
 function buildSshLines(): TerminalLine[] {
   const now      = new Date()
   const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const months   = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
                     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-  // Formato: "Mon Jan  2 15:04:05 2006" (Go-style, doble espacio si día < 10)
-  const day  = now.getDate()
-  const time = now.toTimeString().slice(0, 8)
+  const day     = now.getDate()
+  const time    = now.toTimeString().slice(0, 8)
   const dateStr = `${weekdays[now.getDay()]} ${months[now.getMonth()]} ${day < 10 ? ' ' + day : day} ${time} ${now.getFullYear()}`
 
   return [
@@ -40,16 +36,6 @@ function buildSshLines(): TerminalLine[] {
 
 // ─── Hook principal ───────────────────────────────────────────────────────────
 
-/**
- * Hook principal del terminal.
- * Maneja: estado, ejecución de comandos, historial, Cmd+K, VFS.
- *
- * Flujo de ejecución (execute):
- *   1. Intercepta comandos VFS (cd, ls, cat)
- *   2. Luego busca en EASTER_EGGS
- *   3. Finalmente busca en COMMANDS
- *   4. Si no hay match → "command not found"
- */
 export function useTerminal() {
   const [state, setState] = useState<TerminalState>({
     lines:        [],
@@ -57,8 +43,8 @@ export function useTerminal() {
     history:      [],
     historyIdx:   -1,
     isOpen:       false,
-    hasConnected: false,   // flag de primera conexión
-    isGlitching:  false,   // flag de efecto glitch
+    hasConnected: false,
+    isGlitching:  false,
   })
 
   const [vfsState, setVfsState] = useState<VFSState>({
@@ -68,13 +54,12 @@ export function useTerminal() {
 
   // ── SSH intro en la primera apertura ──────────────────────────────────────
   useEffect(() => {
-    if (!state.isOpen) return          // solo cuando se abre
-    if (state.hasConnected) return     // solo la primera vez
+    if (!state.isOpen) return
+    if (state.hasConnected) return
 
     const sshLines = buildSshLines()
-    const DELAYS   = [0, 300, 600, 900] // ms entre cada línea
+    const DELAYS   = [0, 300, 600, 900]
 
-    // Marcamos hasConnected de inmediato para evitar re-ejecuciones
     setState(s => ({ ...s, hasConnected: true, lines: [] }))
 
     sshLines.forEach((line, i) => {
@@ -154,7 +139,6 @@ export function useTerminal() {
         historyIdx:  -1,
         isGlitching: true,
       }))
-      // Después de la animación (600ms) cierra el modal
       setTimeout(() => {
         setState(s => ({ ...s, isOpen: false, isGlitching: false }))
       }, 600)
@@ -174,10 +158,95 @@ export function useTerminal() {
       return
     }
 
+    // ── 4. contact --msg "..." — despacha mensaje vía /api/contact ────────────
+    // Interceptado ANTES de VFS y COMMANDS para evitar colisión con `contact`
+    if (lower.startsWith('contact --msg')) {
+      // Preservar el case original del mensaje; solo el prefijo va en lower
+      const rawMsg = trimmed.slice('contact --msg'.length).trim().replace(/^"|"$/g, '').trim()
+
+      if (!rawMsg) {
+        setState(s => ({
+          ...s,
+          lines: [...s.lines, promptLine, {
+            id:      Date.now() + 'cu',
+            type:    'error',
+            content: 'usage: contact --msg "your message here"',
+          }],
+          input:      '',
+          history:    [lower, ...s.history],
+          historyIdx: -1,
+        }))
+        return
+      }
+
+      // Líneas de loading — se muestran de inmediato
+      const loadingLines: TerminalLine[] = [
+        { id: Date.now() + 'cl1', type: 'accent', content: 'Dispatching payload...' },
+        { id: Date.now() + 'cl2', type: 'output', content: 'POST /api/contact HTTP/1.1' },
+      ]
+
+      setState(s => ({
+        ...s,
+        lines:      [...s.lines, promptLine, ...loadingLines],
+        input:      '',
+        history:    [lower, ...s.history],
+        historyIdx: -1,
+      }))
+
+      // Fire-and-forget: setState en .then() cuando la promesa resuelve
+      fetch('/api/contact', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          name:    'Terminal User',
+          email:   'terminal@dnnnah.io',
+          message: rawMsg,
+        }),
+      })
+        .then(res => {
+          const line: TerminalLine = res.ok
+            ? { id: Date.now() + 'cs', type: 'success', content: '200 OK — message delivered.' }
+            : { id: Date.now() + 'ce', type: 'error',   content: '503 — dispatch failed. try the form at std/output.' }
+          setState(s => ({ ...s, lines: [...s.lines, line] }))
+        })
+        .catch(() => {
+          setState(s => ({
+            ...s,
+            lines: [...s.lines, {
+              id:      Date.now() + 'cne',
+              type:    'error',
+              content: '503 — dispatch failed. try the form at std/output.',
+            }],
+          }))
+        })
+
+      return
+    }
+
+    // ── 5. contact — revela email en runtime (nunca en bundle estático) ───────
+    if (lower === 'contact') {
+      const staticLines  = COMMANDS['contact'] ?? []
+      // revealEmail() decodifica Base64 solo aquí, en el momento de ejecución
+      const emailRevealed = revealEmail()
+      const outputLines  = staticLines.map(l =>
+        l.id === 'ct2'
+          ? { ...l, content: `email:    ${emailRevealed}` }
+          : l
+      )
+      setState(s => ({
+        ...s,
+        lines:      [...s.lines, promptLine, ...outputLines],
+        input:      '',
+        history:    [lower, ...s.history],
+        historyIdx: -1,
+      }))
+      return
+    }
+
     let outputLines: TerminalLine[] = []
     let nextVfsState: VFSState = currentVfsState
 
-    // ── 4. Comandos VFS ───────────────────────────────────────────────────────
+    // ── 6. Comandos VFS ───────────────────────────────────────────────────────
     if (lower === 'cd' || lower.startsWith('cd ')) {
       const target = trimmed.slice(3).trim()
       const result = vfsCd(currentVfsState, target || '~')
@@ -208,12 +277,12 @@ export function useTerminal() {
       }
     }
 
-    // ── 5. Easter eggs ────────────────────────────────────────────────────────
+    // ── 7. Easter eggs ────────────────────────────────────────────────────────
     else if (EASTER_EGGS[lower]) {
       outputLines = EASTER_EGGS[lower]
     }
 
-    // ── 6. Comandos normales ──────────────────────────────────────────────────
+    // ── 8. Comandos normales ──────────────────────────────────────────────────
     else if (COMMANDS[lower]) {
       outputLines = COMMANDS[lower]
       const routes: Record<string, string> = {
@@ -226,7 +295,7 @@ export function useTerminal() {
       if (route) setTimeout(() => { window.location.href = route }, 800)
     }
 
-    // ── 7. Comando no encontrado ──────────────────────────────────────────────
+    // ── 9. Comando no encontrado ──────────────────────────────────────────────
     else {
       outputLines = [{
         id:      Date.now() + 'e',

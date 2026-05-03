@@ -1,33 +1,54 @@
 'use client'
 
+import { useState } from 'react'
+import { copyEmailToClipboard, openMailto, getDisplayEmail } from '@/shared/lib/email'
+
 /**
- * Sidebar de contacto — status, email directo y links sociales.
- * minWidth: 0 es crítico para que no desborde el grid en mobile.
+ * Sidebar de contacto.
+ * Email ofuscado — Zero Spam Policy: no existe en plano en el bundle.
  */
 
-const RUNTIME_STATUS = [
-  { key: 'Response time', val: '< 24h' },
-  { key: 'Timezone',      val: 'UTC-5 (LATAM)' },
-  { key: 'Open to',       val: 'Remote · Full-time · Contract' },
-]
-
 const SOCIAL_LINKS = [
-  { icon: 'in', label: 'LinkedIn',   sub: 'linkedin.com/in/dnnnah', href: 'https://linkedin.com/in/dnnnah' },
-  { icon: 'gh', label: 'GitHub',     sub: 'github.com/dnnnah',      href: 'https://github.com/dnnnah' },
-  { icon: 'cv', label: 'CV / Resume',sub: 'dnnnah_cv.pdf',          href: '/dnnnah_cv.pdf' },
+  {
+    icon:  'in',
+    label: 'LinkedIn',
+    sub:   'linkedin.com/in/dnnnah',
+    href:  'https://linkedin.com/in/dnnnah',
+  },
+  {
+    icon:  'gh',
+    label: 'GitHub',
+    sub:   'github.com/dnnnah',
+    href:  'https://github.com/dnnnah',
+  },
+  {
+    icon:  'cv',
+    label: 'CV / Resume',
+    sub:   'dnnnah_cv.pdf',
+    href:  '/dnnnah_cv.pdf',
+  },
 ]
 
 export function SocialLinks() {
+  const [copied, setCopied] = useState(false)
+
+  async function handleCopy() {
+    const ok = await copyEmailToClipboard()
+    if (ok) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   return (
     <aside style={{
-      display:         'flex',
-      flexDirection:   'column',
+      display:       'flex',
+      flexDirection: 'column',
+      gap:           '0',
       backgroundColor: 'var(--color-bg-surface)',
-      border:          '1px solid var(--color-border)',
-      borderRadius:    '8px',
-      overflow:        'hidden',
-      /* Evita que desborde su celda del grid cuando colapsa a 1 columna */
-      minWidth:        0,
+      border:        '1px solid var(--color-border)',
+      borderRadius:  '8px',
+      overflow:      'hidden',
     }}>
 
       {/* Runtime status */}
@@ -41,12 +62,15 @@ export function SocialLinks() {
           // runtime_status
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          {RUNTIME_STATUS.map(item => (
+          {[
+            { key: 'Response time', val: '< 24h' },
+            { key: 'Timezone',      val: 'UTC-5 (LATAM)' },
+            { key: 'Open to',       val: 'Remote · Full-time · Contract' },
+          ].map(item => (
             <div key={item.key} className="font-mono" style={{
               display:  'flex',
               gap:      '8px',
               fontSize: 'clamp(9px, 1.8vw, 11px)',
-              flexWrap: 'wrap',
             }}>
               <span style={{ color: 'var(--color-text-muted)', flexShrink: 0 }}>
                 {item.key}:
@@ -59,7 +83,7 @@ export function SocialLinks() {
         </div>
       </div>
 
-      {/* Direct contact */}
+      {/* Direct contact — Zero Spam Policy */}
       <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
         <p className="font-mono" style={{
           fontSize:      '10px',
@@ -69,22 +93,59 @@ export function SocialLinks() {
         }}>
           // direct_contact
         </p>
-        <a
-          href="mailto:dnnnah@icloud.com"
-          className="font-mono"
-          style={{
-            fontSize:       'clamp(9px, 1.8vw, 11px)',
-            color:          'var(--color-text-muted)',
-            textDecoration: 'none',
-            transition:     'color 0.2s ease',
-            /* Permite que el email se parta si no cabe */
-            wordBreak:      'break-all',
-          }}
-          onMouseEnter={e => e.currentTarget.style.color = 'var(--color-accent)'}
-          onMouseLeave={e => e.currentTarget.style.color = 'var(--color-text-muted)'}
-        >
-          dnnnah[at]icloud[dot]com
-        </a>
+
+        {/* Email visualmente ofuscado — humanos lo leen, regex no */}
+        <p className="font-mono" style={{
+          fontSize:   'clamp(9px, 1.8vw, 11px)',
+          color:      'var(--color-text-muted)',
+          margin:     '0 0 10px 0',
+          userSelect: 'none',
+        }}>
+          {getDisplayEmail()}
+        </p>
+
+        {/* Acciones — el email real solo se decodifica al click */}
+        <div style={{ display: 'flex', gap: '6px' }}>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="font-mono"
+            style={{
+              flex:         1,
+              padding:      '6px 10px',
+              fontSize:     '10px',
+              background:   copied ? 'rgba(80,250,123,0.1)' : 'var(--color-bg-elevated)',
+              border:       `1px solid ${copied ? 'var(--color-status-live)' : 'var(--color-border)'}`,
+              color:        copied ? 'var(--color-status-live)' : 'var(--color-text)',
+              borderRadius: '4px',
+              cursor:       'pointer',
+              transition:   'all 0.2s ease',
+            }}
+          >
+            {copied ? '✓ copied' : '[ copy ]'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => openMailto('Hello DNNNAH', '')}
+            className="font-mono"
+            style={{
+              flex:         1,
+              padding:      '6px 10px',
+              fontSize:     '10px',
+              background:   'var(--color-bg-elevated)',
+              border:       '1px solid var(--color-border)',
+              color:        'var(--color-text)',
+              borderRadius: '4px',
+              cursor:       'pointer',
+              transition:   'border-color 0.2s ease',
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--color-accent)'}
+            onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--color-border)'}
+          >
+            [ mail ]
+          </button>
+        </div>
       </div>
 
       {/* Social links */}
@@ -114,49 +175,42 @@ export function SocialLinks() {
                 backgroundColor: 'var(--color-bg-base)',
                 textDecoration:  'none',
                 transition:      'border-color 0.2s ease, background-color 0.2s ease',
-                /* Evita overflow del link dentro del aside */
-                minWidth:        0,
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.borderColor     = 'var(--color-accent)'
-                e.currentTarget.style.backgroundColor = 'var(--color-bg-elevated)'
+                e.currentTarget.style.borderColor       = 'var(--color-accent)'
+                e.currentTarget.style.backgroundColor   = 'var(--color-bg-elevated)'
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.borderColor     = 'var(--color-border)'
-                e.currentTarget.style.backgroundColor = 'var(--color-bg-base)'
+                e.currentTarget.style.borderColor       = 'var(--color-border)'
+                e.currentTarget.style.backgroundColor   = 'var(--color-bg-base)'
               }}
             >
               <span className="font-mono" style={{
-                color:      'var(--color-accent)',
-                minWidth:   '16px',
-                fontSize:   '11px',
+                color:     'var(--color-accent)',
+                minWidth:  '16px',
+                fontSize:  '11px',
                 fontWeight: 700,
-                flexShrink: 0,
               }}>
                 {link.icon}
               </span>
-
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ flex: 1 }}>
                 <div className="font-mono" style={{
-                  fontSize:     '11px',
-                  color:        'var(--color-text)',
-                  overflow:     'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace:   'nowrap',
+                  fontSize: '11px',
+                  color:    'var(--color-text)',
                 }}>
                   {link.label}
                 </div>
                 <div className="font-mono" style={{
-                  fontSize:  '9px',
-                  color:     'var(--color-text-muted)',
-                  /* URL larga se parte antes de desbordar */
-                  wordBreak: 'break-all',
+                  fontSize: '9px',
+                  color:    'var(--color-text-muted)',
                 }}>
                   {link.sub}
                 </div>
               </div>
-
-              <span aria-hidden="true" style={{ fontSize: '9px', color: 'var(--color-text-muted)', flexShrink: 0 }}>
+              <span style={{
+                fontSize: '9px',
+                color:    'var(--color-text-muted)',
+              }}>
                 ↗
               </span>
             </a>
