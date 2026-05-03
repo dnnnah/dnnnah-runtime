@@ -85,12 +85,28 @@ export function SidebarNav({ project }: { project: Project }) {
     <aside
       className="showcase-sidebar"
       style={{
+        position:        'sticky',
+        top:             'calc(var(--navbar-h) * 2)',
+        height:          'calc(100dvh - calc(var(--navbar-h) * 2))',
         backgroundColor: 'var(--color-bg-surface)',
         borderRight:     '1px solid var(--color-border)',
+        /*
+          Layout vertical de 3 zonas:
+          - Identity (arriba, fija)
+          - Nav (medio, scrollable si overflow)
+          - Stack (abajo, fija)
+        */
+        display:        'flex',
+        flexDirection:  'column',
+        overflow:       'hidden',
       }}
     >
-      {/* Project identity */}
-      <div style={{ padding: '16px', borderBottom: '1px solid var(--color-border)' }}>
+      {/* Project identity — zona fija superior */}
+      <div style={{
+        padding:      '16px',
+        borderBottom: '1px solid var(--color-border)',
+        flexShrink:   0,
+      }}>
         <div className="font-mono" style={{
           fontSize:      '8px',
           color:         'var(--color-text-muted)',
@@ -114,8 +130,13 @@ export function SidebarNav({ project }: { project: Project }) {
         <StatusBadge status={project.status} />
       </div>
 
-      {/* Navegación por secciones */}
-      <nav style={{ flex: 1, padding: '8px 0' }}>
+      {/* Navegación por secciones — zona scrollable del medio */}
+      <nav style={{
+        flex:      1,
+        minHeight: 0,           /* permite shrink dentro del flex parent */
+        overflowY: 'auto',
+        padding:   '8px 0',
+      }}>
         {GROUPS.map(group => (
           <div key={group}>
             <div className="font-mono" style={{
@@ -171,8 +192,12 @@ export function SidebarNav({ project }: { project: Project }) {
         ))}
       </nav>
 
-      {/* Stack tags */}
-      <div style={{ padding: '16px', borderTop: '1px solid var(--color-border)' }}>
+      {/* Stack tags — zona fija inferior */}
+      <div style={{
+        padding:    '16px',
+        borderTop:  '1px solid var(--color-border)',
+        flexShrink: 0,
+      }}>
         <div className="font-mono" style={{
           fontSize:      '8px',
           color:         'var(--color-text-muted)',
