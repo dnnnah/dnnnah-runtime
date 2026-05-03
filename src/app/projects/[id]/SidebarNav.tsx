@@ -85,20 +85,8 @@ export function SidebarNav({ project }: { project: Project }) {
     <aside
       className="showcase-sidebar"
       style={{
-        position:        'sticky',
-        top:             'calc(var(--navbar-h) * 2)',
-        height:          'calc(100dvh - calc(var(--navbar-h) * 2))',
         backgroundColor: 'var(--color-bg-surface)',
         borderRight:     '1px solid var(--color-border)',
-        /*
-          Layout vertical de 3 zonas:
-          - Identity (arriba, fija)
-          - Nav (medio, scrollable si overflow)
-          - Stack (abajo, fija)
-        */
-        display:        'flex',
-        flexDirection:  'column',
-        overflow:       'hidden',
       }}
     >
       {/* Project identity — zona fija superior */}
