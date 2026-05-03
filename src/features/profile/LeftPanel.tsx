@@ -55,8 +55,7 @@ export function LeftPanel() {
 
   return (
     <aside style={{
-      position:      'sticky',
-      top:           '80px',
+
       height:        'fit-content',
       display:       'flex',
       flexDirection: 'column',

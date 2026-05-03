@@ -85,14 +85,6 @@ export function SidebarNav({ project }: { project: Project }) {
     <aside
       className="showcase-sidebar"
       style={{
-        position:        'sticky',
-        /*
-          top = navbar height (56px) + sticky header del detalle (56px).
-          Usar el token en lugar del magic number 112px.
-        */
-        top:             'calc(var(--navbar-h) * 2)',
-        height:          'calc(100dvh - calc(var(--navbar-h) * 2))',
-        overflowY:       'auto',
         backgroundColor: 'var(--color-bg-surface)',
         borderRight:     '1px solid var(--color-border)',
       }}

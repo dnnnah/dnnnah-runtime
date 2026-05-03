@@ -70,7 +70,11 @@ html {
   scroll-behavior: smooth;
   /* Evita que iOS redimensione el texto al rotar */
   -webkit-text-size-adjust: 100%;
-  overflow-x: hidden;
+  /*
+    NO usar overflow-x: hidden aquí — convierte html en scroll container
+    y rompe position:sticky en TODOS los descendientes.
+    Usar overflow-clip si se necesita contener desbordes horizontales.
+  */
 }
 
 body {
@@ -83,9 +87,12 @@ body {
   transition:       background-color 0.4s ease, color 0.4s ease;
   -webkit-font-smoothing:  antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* Previene scroll horizontal fantasma en mobile */
-  overflow-x: hidden;
-  width:      100%;
+  /*
+    overflow-x: hidden ROMPE position:sticky en descendientes.
+    Si hay scroll horizontal fantasma, arréglalo en el componente
+    que desborda — no aquí.
+  */
+  width: 100%;
 }
 
 /* ─── KEYFRAMES ─────────────────────────────────────────── */
